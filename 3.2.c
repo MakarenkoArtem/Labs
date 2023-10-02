@@ -55,7 +55,7 @@ char* solutionFunc(float a, float b, float e, int resultInput) {
 	float h = (b - a) / 2 / n;
 	float integral = integralFunc(a, b, h, n);
 	char answer[100];
-	sprintf(answer, "integral=%.4f", integral);
+	sprintf(answer, "Integral=%.4f", integral);
 	return answer;
 }
 
@@ -64,18 +64,20 @@ float function(float x) {
 }
 
 float integralFunc(float a, float b, float h, int n){
-	float* x= malloc(sizeof(float) * (2 * n + 1));
+	float* x= (float*)malloc(sizeof(float) * (2 * n + 1));
 	for (int i = 0; i < 2 * n + 1; ++i) {
 		x[i] = a + i * h;
 	}
-	float sum1 = function(x[0]), sum2=0, sum3=0, sum4 = function(x[n*2]);
+	float component1 = function(x[0]), component2=0, component3 =0, component4 = function(x[n*2]);
 	for (int i = 1; i <= n; ++i) {
-		sum2 += function(x[i * 2 - 1]);
+		component2 += function(x[i * 2 - 1]);
 	}
 	for (int i = 1; i < n; ++i) {
-		sum3 += function(x[i * 2]);
+		component3 += function(x[i * 2]);
 	}
-	float integral = h / 3 * (sum1 + 4 * sum2 + 2 * sum3 + sum4);
+	free(x);
+	x = NULL;
+	float integral = h / 3 * (component1 + 4 * component2 + 2 * component3 + component4);
 	return integral;
 }
 
