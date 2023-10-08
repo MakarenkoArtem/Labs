@@ -1,4 +1,5 @@
 
+
 #define _CRT_SECURE_NO_WARNINGS
 //#include "stdafx.h"
 #include<stdio.h>
@@ -10,23 +11,48 @@
 #define ErrorCountNotNumber -1
 #define ErrorCountNotInteger -2
 #define ErrorCountLessZero -3
+#define ErrorListHasNotZero "List has not 0"
 
-int inPut(float** list, float* count);
-char* solutionFunc(float* list, int resultInput, float count);
+char* checkInPut(int resultInput);
+int inputCount(float* count);
+void* mallocList(float count);
+int inputList(float* list, float count);
+int solutionFunc(float* list, int resultInput, float count, float* avg);
 int findBorders(float* list, int* indexFirstMaxNum, int* indexLastZero, float count);
 float average(float* list, int leftBorder, int rightBorder);
-int outPut(char* s);
+void freeList(float* list);
+int outPut(float s);
+int outPutText(char* s);
 
-void main() {
-	float count;
+int main() {
+	float count, avg;
 	float* list;
-	int resultInput = inPut(&list, &count);
-	char* result = solutionFunc(list, resultInput, count);
-	outPut(result);
-	return 0;
+	int resultInput = inputCount(&count);
+	if (resultInput) {
+		outPutText(checkInPut(resultInput));
+		return !OK;
+	}
+	list = (float*)mallocList(count);
+	inputList(list, count);
+	char* result = solutionFunc(list, resultInput, count, &avg);
+		if (result) {
+			outPutText(result);
+		}
+		else {
+			outPut(avg);
+		}
+	freeList(list);
+	return OK;
+}
+void freeList(float* list) {
+	free(list);
+	list = NULL;
 }
 
-int inPut(float** list, float* count) {
+void* mallocList(float count) {
+	return malloc(sizeof(float) * (int)count);
+}
+int inputCount(float* count) {
 	printf("Enter count: ");
 	if (scanf("%f", count) == 0) {
 		return ErrorCountNotNumber;
@@ -34,20 +60,23 @@ int inPut(float** list, float* count) {
 	else if (*count != (int)*count) {
 		return ErrorCountNotInteger;
 	}
-	else if (*count<=0) {
+	else if (*count <= 0) {
 		return ErrorCountLessZero;
 	}
-	*list = (float*)malloc(sizeof(float) * (int)*count);
-	for (int i = 0; i < *count; ++i) {
+	return OK;
+}
+int inputList(float* list, float count) {
+	for (int i = 0; i < count; ++i) {
 		printf("%i value: ", i);
-		while (scanf("%f", &(*list)[i]) == 0){
+		while (scanf("%f", &list[i]) == 0) {
 			printf("Value not number\n%i value: ", i);
-			scanf("%*[^\r^\n]");	
+			scanf("%*[^\r^\n]");
 		}
 	}
 	return OK;
 }
-char* solutionFunc(float* list, int resultInput, float count) {
+
+char* checkInPut(int resultInput) {
 	switch (resultInput) {
 	case ErrorCountNotNumber:
 		return "Count not number";
@@ -56,11 +85,14 @@ char* solutionFunc(float* list, int resultInput, float count) {
 	case ErrorCountLessZero:
 		return "Count <= 0";
 	default:
-		break;
+		return "OК";
 	}
-	int indexFirstMaxNum=0, indexLastZero = -1;
+}
+
+int solutionFunc(float* list, int resultInput, float count, float* avg) {
+	int indexFirstMaxNum = 0, indexLastZero = -1;
 	if (findBorders(list, &indexFirstMaxNum, &indexLastZero, count)) {
-		return "List has not 0";
+		return ErrorListHasNotZero;
 	}
 	int leftBorder = indexFirstMaxNum, rightBorder = indexLastZero;
 	if (leftBorder > rightBorder) {
@@ -68,11 +100,8 @@ char* solutionFunc(float* list, int resultInput, float count) {
 		rightBorder = leftBorder - rightBorder;
 		leftBorder = leftBorder - rightBorder;
 	}
-	char answer[100];
-	sprintf(answer, "Answer=%f", average(list, leftBorder, rightBorder));
-	free(list);
-	list = NULL;
-	return answer;
+	*avg = average(list, leftBorder, rightBorder);
+	return OK;
 }
 int findBorders(float* list, int* indexFirstMaxNum, int* indexLastZero, float count) {
 	float maxValue = list[0];
@@ -89,14 +118,20 @@ int findBorders(float* list, int* indexFirstMaxNum, int* indexLastZero, float co
 }
 float average(float* list, int leftBorder, int rightBorder) {
 	float sumElems = 0;
-	for (int i= leftBorder; i <= rightBorder; ++i) {
+	for (int i = leftBorder; i <= rightBorder; ++i) {
 		sumElems += list[i];
 	}
 	return sumElems / (float)(rightBorder - leftBorder + 1);
 }
 
-int outPut(char* s) {
+int outPutText(char* s) {
 	printf(s);
 	_getch();
-	return 0;
+	return OK;
+}
+
+int outPut(float s) {
+	printf("Value=%f\n", s);
+	_getch();
+	return OK;
 }
