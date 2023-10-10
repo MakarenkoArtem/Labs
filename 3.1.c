@@ -5,26 +5,32 @@
 #include<math.h>
 #include<stdlib.h>
 
-#define factorialZero 1;
-
+#define OK 0
+#define factorialZero 1
+#define Error "Incorrect input\n"
 int inPut(float* e);
 float solutionFunc(float e);
-int outPut(char* s, float value);
-int answerFunc(float e, float value);
+int output(float value);
+int outputText(char* value);
 
-void main() {
+int main() {
 	float e;
-	if (!inPut(&e)){
-		outPut("Incorrect input", 0.0);
-	}else {
-		answerFunc(e, solutionFunc(e));
+	if (inPut(&e) != 0) {
+		outputText(Error);
 	}
-	return 0;
+	else {
+		output(solutionFunc(e));
+	}
+	return OK;
 }
 
 int inPut(float* e) {
 	printf("Enter E = ");
-	return scanf("%f", e) == 1 && *e>0;
+	int res = 0;
+	if (scanf("%f", e) != 1 || 0> *e || e >1) {
+		res = -1;
+	}
+	return res;
 }
 float solutionFunc(float e) {
 	float currentValue, lastValue, value = 0;
@@ -35,24 +41,18 @@ float solutionFunc(float e) {
 		factorial = -factorial * ++n;
 		currentValue = 1.0 / factorial;
 		value += lastValue;
-		//printf("%i %f %f %f %f\n", factorial, currentValue, lastValue, currentValue + lastValue, fabs(currentValue + lastValue));
-	} while (fabs(currentValue + lastValue)>=e || n==1);
-	//value += lastValue;
+	} while (fabs(currentValue + lastValue) >= e || n == 1);
+	value += lastValue;
 	return value;
 }
 
-int answerFunc(float e, float value){
-	int counter = 1;
-	while ((int)e == 0) {
-		e *= 10;
-		++counter;
-	}
-	char s[] = { '%','.', counter + '0', "f"};
-	//sprintf(s, s, value);
-	outPut(s, value);
-}
-int outPut(char* s, float value) {
-	printf(s, value);
+int output(float value) {
+	printf("%.4f", value);
 	_getch();
-	return 0;
+	return OK;
+}
+int outputText(char* value) {
+	printf(value);
+	_getch();
+	return OK;
 }
