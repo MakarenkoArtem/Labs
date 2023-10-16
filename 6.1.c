@@ -10,8 +10,8 @@
 
 int inputCount(int* count);
 void** createMatrix(int columns, int rows);
-void* mallocList(int count);
-void* callocList(int count);
+void* mallocList(int count, int sizeOfType);
+void* callocList(int count, int sizeOfType);
 int inputMatrix(int** matrix, int columns, int rows);
 int solutionFunc(int** matrix, int count);
 int printMatrix(int** matrix, int columns, int rows);
@@ -34,23 +34,23 @@ int inputCount(int* count) {
 	return scanf("%i", count) == 0 || *count <= 0;
 }
 
-void* mallocList(int count) {
-	return malloc(sizeof(int) * (int)count);
+void* mallocList(int count, int sizeOfType) {
+	return malloc(sizeOfType * count);
 }
 
-void* callocList(int count) {
-	return calloc(count, sizeof(int));
+void* callocList(int count, int sizeOfType) {
+	return calloc(count, sizeOfType);
 }
 
 void** createMatrix(int columns, int rows) {
-	int** matrix = (int*)callocList(rows);
+	int** matrix = (int*)callocList(rows, sizeof(int*));
 	for (int i = 0; i < rows; ++i) {
-		matrix[i] = (int*)callocList(columns);
+		matrix[i] = (int*)callocList(columns, sizeof(int));
 	}
 	return matrix;
 }
 
-int inputMatrix(int** matrix, int columns, int rows){
+int inputMatrix(int** matrix, int columns, int rows) {
 	for (int i = 0; i < rows; ++i) {
 		for (int j = 0; j < columns; ++j) {
 			while (scanf("%i", &matrix[i][j]) == 0) {
@@ -87,7 +87,7 @@ int printMatrix(int** matrix, int columns, int rows) {
 	return OK;
 }
 
-void freeMatrix(int** matrix, int rows){
+void freeMatrix(int** matrix, int rows) {
 	for (int i = 0; i < rows; ++i) {
 		free(matrix[i]);
 	}
