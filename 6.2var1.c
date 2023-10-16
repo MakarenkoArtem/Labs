@@ -10,8 +10,8 @@
 
 int inputColRow(int* rows, int* columns);
 void** createMatrix(int columns, int rows);
-void* mallocList(int count);
-void* callocList(int count);
+void* mallocList(int count, int sizeOfType);
+void* callocList(int count, int sizeOfType);
 int inputMatrix(int** matrix, int columns, int rows);
 int solutionFunc(int** matrix, int columns, int rows);
 int printMatrix(int** matrix, int columns, int rows);
@@ -35,18 +35,18 @@ int inputColRow(int* rows, int* columns) {
 	return scanf("%i %i", rows, columns) <2 || *rows <= 0 || *columns <= 0;
 }
 
-void* mallocList(int count) {
-	return malloc(sizeof(int) * (int)count);
+void* mallocList(int count, int sizeOfType) {
+	return malloc(sizeOfType * count);
 }
 
-void* callocList(int count) {
-	return calloc(count, sizeof(int));
+void* callocList(int count, int sizeOfType) {
+	return calloc(count, sizeOfType);
 }
 
 void** createMatrix(int columns, int rows) {
-	int** matrix = (int*)callocList(rows);
+	int** matrix = (int*)callocList(rows, sizeof(int*));
 	for (int i = 0; i < rows; ++i) {
-		matrix[i] = (int*)callocList(columns);
+		matrix[i] = (int*)callocList(columns, sizeof(int));
 	}
 	return matrix;
 }
