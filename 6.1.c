@@ -23,7 +23,7 @@
 #endif
 
 int inputCount(int* count);
-void** createMatrix(int columns, int rows, int size);
+void** createMatrix(int columns, int rows);
 void* mallocList(int count, int sizeOfType);
 void* callocList(int count, int sizeOfType);
 int inputMatrix(TypeOfMatix** matrix, int columns, int rows);
@@ -39,7 +39,7 @@ int main() {
 		outputText(ErrorIncorrectInput);
 		return !OK;
 	}
-	TypeOfMatix** matrix = (TypeOfMatix**)createMatrix(count, count, sizeof(TypeOfMatix));
+	TypeOfMatix** matrix = (TypeOfMatix**)createMatrix(count, count);
 	inputMatrix(matrix, count, count);
 	solutionFunc(matrix, count);
 	printMatrix(matrix, count, count);
