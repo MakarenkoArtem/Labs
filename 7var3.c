@@ -6,6 +6,7 @@
 #include<stdlib.h>
 
 #define OK 0
+#define MemoryError "Memory error"
 #define ErrorIncorrectInput "Incorrect input"
 #define SquareMatrix -1
 #define SpiralMatrix -10
@@ -44,15 +45,26 @@ int main() {
 		return !OK;
 	}
 	TypeOfMatix** matrix = (TypeOfMatix**)createMatrix(columns, rows);
+	if (matrix == !OK) { 
+		outputText(MemoryError);
+		_getch();
+		return !OK; }
 	inputMatrix(matrix, columns, rows);
 	TypeOfMatix** matrixNew = (TypeOfMatix**)copyMatrix(matrix, columns, rows);
+	if (matrixNew == !OK) {
+		outputText(MemoryError);
+		freeMatrix(matrix, rows);
+		_getch();
+		return !OK;
+	}
 	int result = solutionFunc(matrix, columns, rows, 0);
 	if (result == SpiralMatrix) {
 		solutionFunc(matrixNew, columns, rows, 1);
 		outputText("\n+1 extra point\n");
 		printMatrix(matrixNew, columns, rows);
 		outputText("\n+2 extra point\n");
-	}else if(result == SquareMatrix){
+	}
+	else if (result == SquareMatrix) {
 		outputText("\n+2 extra point\n");
 	}
 	printMatrix(matrix, columns, rows);
@@ -64,6 +76,7 @@ int main() {
 
 void** copyMatrix(TypeOfMatix** matrix, int columns, int rows) {
 	TypeOfMatix** matrixNew = (TypeOfMatix**)createMatrix(columns, rows);
+	if (matrixNew == !OK) { return !OK; }
 	for (int i = 0; i < rows; ++i) {
 		for (int j = 0; j < columns; ++j) {
 			matrixNew[i][j] = matrix[i][j];
@@ -90,8 +103,10 @@ void** createMatrix(int columns, int rows) {
 	//2)(TypeOfMatix**)-in define changes the type
 	//3)callocList-in C++ you only need to change the body of the callocList()/mallocList()
 	TypeOfMatix** matrix = (TypeOfMatix**)callocList(rows, sizeof(void*));
+	if (matrix == NULL) { return !OK; }
 	for (int i = 0; i < rows; ++i) {
 		matrix[i] = (TypeOfMatix*)callocList(columns, sizeof(TypeOfMatix));
+		if (matrix[i] == NULL) { return !OK; }
 	}
 	return (void**)matrix;
 }
@@ -141,30 +156,30 @@ TypeOfMatix** createSnakeList(TypeOfMatix** matrix, int columns, int rows) {
 
 TypeOfMatix** createFromCenterList(TypeOfMatix** matrix, int columns, int rows) {
 	TypeOfMatix** list = (TypeOfMatix**)callocList(columns * rows, sizeof(void*));
-	int c, counter = 0, center = rows/2, x = center, y = center, i = 0;
+	int c, counter = 0, center = rows / 2, x = center, y = center, i = 0;
 	while (x < columns) {
 		++i;
 		c = i;
-		while(c--){//for (; y > center - i; --y) {//int y = center + (i - 1)
+		while (c--) {//for (; y > center - i; --y) {//int y = center + (i - 1)
 			list[counter++] = matrix[y--] + x;
 			//printf("%i", *list[counter - 1]);
 		}
 		if (y < 0) { break; }
 		c = i;
-		while(c--){//for (; x > center - i; --x) {//int x = center +(i - 1)
+		while (c--) {//for (; x > center - i; --x) {//int x = center +(i - 1)
 			list[counter++] = matrix[y] + x--;
 			//printf("%i", *list[counter - 1]);
 		}
 		if (x < 0) { break; }
 		++i;
 		c = i;
-		while(c--){//for (; y < center + i; ++y) {//int y = center - (i - 1)
+		while (c--) {//for (; y < center + i; ++y) {//int y = center - (i - 1)
 			list[counter++] = matrix[y++] + x;
 			//printf("%i", *list[counter - 1]);
 		}
 		if (y >= rows) { break; }
 		c = i;
-		while(c--){//for (; x < center + i; ++x) {//int x = center - (i - 1)
+		while (c--) {//for (; x < center + i; ++x) {//int x = center - (i - 1)
 			list[counter++] = matrix[y] + x++;
 			//printf("%i", *list[counter - 1]);
 		}
@@ -207,7 +222,7 @@ int solutionFunc(TypeOfMatix** matrix, int columns, int rows, int counterMatrix)
 		}
 	}
 	else {
-		list = createList(matrix, columns, rows);		
+		list = createList(matrix, columns, rows);
 	}
 	sorted(list, columns * rows);
 	free(list);
