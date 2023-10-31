@@ -1,0 +1,95 @@
+#define _CRT_SECURE_NO_WARNINGS
+//#include "stdafx.h"
+#include<stdio.h>
+#include<conio.h>
+#include<math.h>
+#include<stdlib.h>
+#include"libraries\strbase.h"
+
+#define OK 0
+#define ErrorIncorrectInput "Incorrect input"
+
+int outputText(char* s);
+int solutionFunc(char* str);
+
+int main() {
+	int count, n=0;
+	if (inputCount(&count)) {
+		outputText(ErrorIncorrectInput);
+		_getch();
+		return !OK;
+	}
+	scanf("\n");
+	char** list = (char**)malloc(count * sizeof(void*));
+	char** list_base = (char**)malloc(count * sizeof(void*));
+	char str_[] = "";
+	for (int i = 0; i < count; ++i) {
+		gets(str_);
+		list_base[i] = (char*)malloc(lenStr(str_) * sizeof(char));
+		list[i] = (char*)malloc(lenStr(str_) * sizeof(char));
+		for (int j = 0; j < lenStr(str_); j++) {
+			list_base[i][j] = str_[j];
+			list[i][j] = str_[j];
+		}
+	}
+	char a[] = "";
+	gets(a);
+	char b[] = "";
+	gets(b);
+	char* str;
+	for (int k = 0; k < count; k++) {
+		str = list[k];
+		outputText(str);
+		outputText("\n");
+		solutionFunc(str);
+		char** listStr = split(str, ' ', &n);
+		if (n != 3) {
+			outputText("It is not FIO");
+			_getch();
+			continue;
+		}
+		char* help;
+		int i = 1;
+		while (listStr[2][i] != '\0') {
+			help = sliceStr(listStr[2], i, i + lenStr(a) - 1);
+			if (compareStr(help, a)) {
+				for (int j = 0; j < lenStr(a) - 1; ++j) {
+					listStr[2] = moveStr(listStr[2], i);
+				}
+				listStr[2] = addChar(listStr[2], i, b);
+			}
+			i++;
+		}
+		for (int i = 0; i < n; i++) {
+			printf("%s ", listStr[i]);
+		}
+		printf("\n");
+	}
+	_getch();
+	return OK;
+}
+
+int solutionFunc(char* str) {
+	int i = 0;
+	while (str[i] != '\0') {
+		if (str[i] == ' ') {
+			if (i == 0 || str[i + 1] == ' ' || str[i + 1] == '\0' || str[i + 1] == ','
+				|| str[i + 1] == '!' || str[i + 1] == '.' || str[i + 1] == '?') {
+				moveStr(str, i);
+				continue;
+			}
+		}
+		i++;
+	}
+	return OK;
+}
+
+int inputCount(int* count) {
+	printf("Enter count: ");
+	return scanf("%i", count) == 0 || *count <= 0;
+}
+
+int outputText(char* s) {
+	printf(s);
+	return OK;
+}
