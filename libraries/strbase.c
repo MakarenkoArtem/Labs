@@ -1,80 +1,82 @@
-#include<stdio.h>
+//#include<stdio.h>
+#include"mystring.h"
 #define OK 0
+#define IndexOutOfRange -2
 #define Error -1
 
-char* moveStr(char* str, int begin) {
-	if (begin < 0) {
+char* deleteChar(char* str, int index) {
+	if (index < 0) {
 		return Error;
-	}
-	do {
-		str[begin] = str[begin+1];
-		begin++;
-	} while (str[begin - 1] != '\0');
+	}else if (index>=lenStr(str)){
+  return IndexOutOfRange;
+}
+for(;str[index]; str[index++]=str[index+1]);
+/*	do {
+		str[begin] = str[begin+1];
+	} while (str[begin++] != '\0');*/
 	return str;
 }
-char* addChar(char* str, int begin, char* addStr) {
+char* addChar(char* str, int index, char addCahr) {
 	if (begin < 0) {
 		return Error;
-	}
-	str = (char*)realloc(str, (lenStr(str)+ lenStr(addStr)-1) * sizeof(char));
-	for (int i = 0; i < lenStr(addStr)-1; ++i) {
+	}else if (begin>=lenStr(str)){
+  return IndexOutOfRange;
+}
+	//str = (char*)realloc(str, (lenStr(str)+ lenStr(addStr)-1) * sizeof(char));
+ int i=lenStr(str);
+	for (; i!=index; str[i--+1]=str[i]);/* {
 		int j = lenStr(str) + 1+i;
 		while (j>begin){
 			str[j] = str[j - 1];
 			j--;
 		}
 		str[begin] = addStr[lenStr(addStr)-i-2];
-	}
+	}*/
+ str[index]=addChar;
 	return str;
 }
 
 int lenStr(char* str) {
-	int i = 0;
-	while (str[i++] != '\0') {}
+ int i=0;
+ for(;str[i];++i);
+	//int i = 0;
+	//while (str[i++] != '\0') {}
 	return i;
 }
 
-char* sliceStr(char* str, int start, int end) {
-	// Выделяем память для новой строки
-	char* slice = malloc((end - start + 1) * sizeof(char));
-	for (int i = start; i < end; ++i) {
+char* subStr(char* str, int start, int end) {
+	// Г‚Г»Г¤ГҐГ«ГїГҐГ¬ ГЇГ Г¬ГїГІГј Г¤Г«Гї Г­Г®ГўГ®Г© Г±ГІГ°Г®ГЄГЁ
+	char* slice = (char*)malloc((end - start + 1) * sizeof(char));
+	for (int i=start; i < end; ++i) {
 		slice[i-start] = str[i];
 	}
-	slice[end - start] = '\0';
+ slice[end - start] = '\0';
 	return slice;
 }
 
 int compareStr(char* a, char* b) {
-	if (lenStr(a) != lenStr(b)) {
-		return OK;
-	}
-	for (int i = 0; i < lenStr(a); ++i) {
-		if (a[i] != b[i]) {
-			return OK;
-		}
-	}
-	return !OK;
+ int i=0;
+	for (; a[i] && a[i]==b[i]; ++i);
+	return !(a[i] || b[i]);
 }
 
-char** split(char* str, char s, int* n) {
-	int i = 0, c=0;
-	*n = 1;
- 	char** list = (char**)malloc(sizeof(void*));
-	list[*n - 1] = (char*)malloc(sizeof(char) * 10);
-	//char* text=(char*)malloc(sizeof(char)*100);
-	while (str[i] != '\0') {
-		if (str[i] == s) {
-			//list[(*n) - 1] = text;
-			//text = (char*)malloc(sizeof(char) * 100);
-			list = (char**)realloc(list, ++(*n) * sizeof(void*));
-			list[*n-1] = (char*)malloc(sizeof(char) * 100);
+char** split(char* str, char* s, int* n) {
+	int i = 0, c=0, lenSplitStr=lenStr(s);
+	*n = 0;
+ char** list = (char**)malloc(sizeof(void*)*lenStr(str)/2);
+	char* text=(char*)malloc(sizeof(char)*lenStr(str)+1);
+	do {
+		if (comparedStr(subStr(str,i,i+lenSplitStr), s) || !str[i]) {
+   text[c++]='\0';
+   list[*n] = (char*)malloc(sizeof(char) * c);
+			list[*n++] = text;
 			c = 0;
+   i+=lenSplitStr;
 		}
 		else {
-			list[*n - 1][c++] = str[i];
-			list[*n - 1][c] = '\0';
+			text = str[i];
 		}
-		i++;
-	}
+	}while(str[i++]);
+free(text);
 	return list;
 }
