@@ -1,5 +1,5 @@
 #define _CRT_SECURE_NO_WARNINGS
-//#include "stdafx.h"
+#include "stdafx.h"
 #include<stdio.h>
 #include<conio.h>
 #include<math.h>
@@ -13,6 +13,8 @@ void* mallocList(int count);
 void* callocList(int count);
 int inputList(int* list, int count);
 int solutionFunc(int* list, int count, int* indexLastNegative, int* indexLastZero);
+int sortedFunc(int* list, int count);
+int searchIndex(int* list, int count, int* indexLastNegative, int* indexLastZero);
 int printList(int* list, int count, int indexLastNegative, int indexLastZero);
 void freeList(int* list);
 int outputText(char* s);
@@ -76,14 +78,14 @@ int searchIndex(int* list, int count, int* indexLastNegative, int* indexLastZero
 
 int convertIntToUnsigned(int* list, int count) {
 	for (int i = 0; i < count; ++i) {
-		list[i] = (unsigned int)(list[i] + (unsigned int)pow(2,sizeof(int)*8-1));
+		list[i] = (unsigned int)(list[i] + (unsigned int)pow(2.0,(double)sizeof(int)*8-1));//pow(2,sizeof(int)*8-1));
 	}
 	return OK;
 }
 
 int convertUnsignedToInt(unsigned* list, int count) {
 	for (int i = 0; i < count; ++i) {
-		list[i] = (int)(list[i] - (int)pow(2, sizeof(int) * 8 - 1));
+		list[i] = (int)(list[i] - (unsigned int)pow(2.0,(double)sizeof(int)*8-1));//pow(2, sizeof(int) * 8 - 1));
 	}
 	return OK;
 }
@@ -91,14 +93,14 @@ int convertUnsignedToInt(unsigned* list, int count) {
 int sortByByte(int* list, int count, int countByte) {
 	int* c = (int*)callocList(257);
 	for (int i = 0; i < count; ++i) {
-		++c[list[i] /(unsigned)pow(256, countByte) % 256U + 1];
+		++c[list[i] /(unsigned)pow(256.0, countByte) % 256U + 1];
 	}
 	for (int i = 1; i < 257; ++i) {
 		c[i] += c[i - 1];
 	}
 	unsigned int* auxiliaryList = (unsigned int*)mallocList(count);
 	for (int i = 0; i < count; ++i) {
-		auxiliaryList[c[list[i] / (unsigned)pow(256, countByte) % 256U]++] = list[i];
+		auxiliaryList[c[list[i] / (unsigned)pow(256.0, countByte) % 256U]++] = list[i];
 		/*printf("\n===========%i===============\n", i);
 		for (int i = 0; i < count; ++i) {
 			printf("%i, ", (int)(list[i] - (int)pow(2, sizeof(int) * 8 - 1)));
@@ -113,7 +115,7 @@ int sortByByte(int* list, int count, int countByte) {
 		list[i] = auxiliaryList[i];
 		//printf("%i, ", (int)(list[i] - (int)pow(2, sizeof(int) * 8 - 1)));
 	}
-	freeList(auxiliaryList);
+	freeList((int*)auxiliaryList);
 	freeList(c);
 	return OK;
 }
@@ -123,12 +125,14 @@ int sortedFunc(int* list, int count) {
 	for (int countByte = 0; countByte < sizeof(int); ++countByte) {
 		sortByByte(list, count, countByte);
 	}
-	convertUnsignedToInt(list, count);
+	convertUnsignedToInt((unsigned*)list, count);
 	return OK;
 }
 
 int printList(int* list, int count, int indexLastNegative, int indexLastZero) {
 	printf("\n");
+	if(indexLastZero==-1){indexLastZero=indexLastNegative;}
+	if(indexLastNegative==-1){indexLastNegative=indexLastZero;}
 	for (int i = count - 1; i > indexLastZero; --i) {
 		printf("%i ", list[i]);
 	}
@@ -138,6 +142,7 @@ int printList(int* list, int count, int indexLastNegative, int indexLastZero) {
 	for (int i = 0; i <= indexLastNegative; ++i) {
 		printf("%i ", list[i]);
 	}
+	_getch();
 	return OK;
 }
 
