@@ -1,8 +1,11 @@
 #pragma once
-//#define _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS
 #include<stdlib.h>
 #include<stdio.h>
 
+
+char* lowerStr(char* str);
+char* toStr(char s);
 char* addStr(char* str, char* addStr);
 char* createNewString(int count);
 char* delChar(char* str, int index);
