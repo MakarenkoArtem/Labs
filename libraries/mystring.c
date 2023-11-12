@@ -76,7 +76,6 @@ char* addChar(char* str, int index, char addChar) {
 char* toStr(char s) {
     char str[2] = {' ',0};
     str[0] = s;
-    printf("|%s\n", str);
     return str;
 }
 
