@@ -1,0 +1,101 @@
+#define _CRT_SECURE_NO_WARNINGS
+//#include "stdafx.h"
+#include<stdio.h>
+#include<conio.h>
+#include<math.h>
+#include<stdlib.h>
+#include"libraries\mystring.h"
+#include <locale.h>
+
+#define MIN(a,b) (((a)<(b))?(a):(b))
+#define MAX(a,b) (((a)>(b))?(a):(b))
+
+#define OK 0
+#define Error "Error"
+#define ErrorIncorrectInput "Incorrect input"
+#define OneSpaceRight " ,!.?-)"
+#define OneSpaceLeft "("
+
+
+int outputText(char* s);
+void* mallocList(int count, int sizeOfType);
+int solutionFunc(char* str, int length, char*** listStr, int* counter);
+int outputLists(char** listWords, int* listCounter, int count);
+
+int main() {
+    setlocale(LC_ALL, "Russian");
+    SetConsoleCP(1251);
+    SetConsoleOutputCP(1251);
+    char** listRows;
+    int counter, length;
+    char str[150];
+    gets(str);
+    if (inputCount(&length)) {
+        outputText(ErrorIncorrectInput);
+        _getch();
+        return !OK;
+    }
+    if (!solutionFunc(str, length, &listRows, &counter) && !outputText(join(listRows, counter, "\n"))) {
+    }
+    else {
+        outputText("\n"Error);
+    }
+    _getch();
+    return OK;
+}
+
+int inputCount(int* count) {
+    printf("Enter count: ");
+    return scanf("%i", count) == 0 || *count <= 0;
+}
+
+void* mallocList(int count, int sizeOfType) {
+    return malloc(sizeOfType * count);
+}
+
+int solutionFunc(char* str, int length, char*** listRows, int* counter) {
+    replace(str, "  ", " ", -1);
+    int n, lenRow, lenNewWord, cntWordsRow=1;
+    *counter = 0;
+    char** listStr = split(str, " ", &n);
+    *listRows = (char**)mallocList(n, sizeof(char*));
+    //char** helpRow = (char**)mallocList(length/2+1, sizeof(char*));
+    lenRow = lenStr(listStr[0]);
+    (*listRows)[*counter] = listStr[0];
+    for (int i = 1; i < n; ++i) {
+        lenNewWord = lenStr(listStr[i]);
+        if (length < lenRow + lenNewWord + 1) {
+            while (min(cntWordsRow - 1, length - lenRow)) {
+                replace((*listRows)[*counter], " ", "  ", min(cntWordsRow - 1, length - lenRow));
+                lenRow += min(cntWordsRow - 1, length - lenRow);
+            }
+            lenRow = lenNewWord;
+            cntWordsRow = 1;
+            (*listRows)[++(*counter)] = listStr[i];
+        }
+        else {
+            lenRow += lenNewWord + 1;
+            ++cntWordsRow;
+            addStr((*listRows)[*counter], " ");
+            addStr((*listRows)[*counter], listStr[i]);
+        }
+    }
+    while (min(cntWordsRow - 1, length - lenRow)) {
+        replace((*listRows)[*counter], " ", "  ", min(cntWordsRow - 1, length - lenRow));
+        lenRow += min(cntWordsRow - 1, length - lenRow);
+    }
+    ++(*counter);
+    free(listStr);
+    return OK;
+}
+
+int outputLists(char** listWords, int* listCounter, int count) {
+    for (int i = 0; i < count; ++i) {
+        printf("%s: %i\n", listWords[i], listCounter[i]);
+    }
+    return OK;
+}
+int outputText(char* s) {
+    printf(s);
+    return OK;
+}
