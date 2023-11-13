@@ -4,6 +4,7 @@
 #include<stdio.h>
 
 
+char* copyStr(char* str);
 char* lowerStr(char* str);
 char* toStr(char s);
 char* addStr(char* str, char* addStr);
