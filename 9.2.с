@@ -21,6 +21,8 @@ int outputText(char* s);
 void* mallocList(int count, int sizeOfType);
 int solutionFunc(char* str, int length, char*** listStr, int* counter);
 int outputLists(char** listWords, int* listCounter, int count);
+void freeTwoDArr(char** matrix, int rows);
+void freeOneDArr(char* arr);
 
 int main() {
     setlocale(LC_ALL, "Russian");
@@ -40,6 +42,7 @@ int main() {
     else {
         outputText("\n"Error);
     }
+    freeTwoDArr(listRows, counter);
     _getch();
     return OK;
 }
@@ -55,37 +58,44 @@ void* mallocList(int count, int sizeOfType) {
 
 int solutionFunc(char* str, int length, char*** listRows, int* counter) {
     replace(str, "  ", " ", -1);
-    int n, lenRow, lenNewWord, cntWordsRow=1;
+    int n, h, lenRow, lenNewWord, cntWordsRow=0;
     *counter = 0;
     char** listStr = split(str, " ", &n);
+
     *listRows = (char**)mallocList(n, sizeof(char*));
-    //char** helpRow = (char**)mallocList(length/2+1, sizeof(char*));
+    char *spaces, ** helpRow = (char**)mallocList(lenStr(str)+1, sizeof(char*));
+
     lenRow = lenStr(listStr[0]);
-    (*listRows)[*counter] = listStr[0];
-    for (int i = 1; i < n; ++i) {
-        lenNewWord = lenStr(listStr[i]);
-        if (length < lenRow + lenNewWord + 1) {
-            while (min(cntWordsRow - 1, length - lenRow)) {
-                replace((*listRows)[*counter], " ", "  ", min(cntWordsRow - 1, length - lenRow));
-                lenRow += min(cntWordsRow - 1, length - lenRow);
+    helpRow[cntWordsRow++] = listStr[0];
+
+    for (int i = 1; i <= n; ++i) {
+        lenNewWord = lenStr(listStr[i%n]);
+        if (length < lenRow + lenNewWord + 1 || i==n) {
+            if (cntWordsRow == 1) {
+                (*listRows)[(*counter)++] = copyStr(helpRow[0]);
             }
-            lenRow = lenNewWord;
-            cntWordsRow = 1;
-            (*listRows)[++(*counter)] = listStr[i];
+            else {
+                h = (length - lenRow) / (cntWordsRow - 1);
+                spaces=createNewString(length - 1);
+                for (int j = 0; j <= h; addChar(spaces, j++, ' '));
+                (*listRows)[*counter] = join(helpRow, cntWordsRow, spaces);
+                addChar(spaces, 0, ' ');
+                replace((*listRows)[(*counter)++], subStr(spaces, 0, h+1), spaces, length - lenRow - (cntWordsRow - 1) * h);
+                freeOneDArr(spaces);
+            }
+            if (i != n) {
+                lenRow = lenNewWord;
+                cntWordsRow = 0;
+                helpRow[cntWordsRow++] = listStr[i];
+            }
         }
         else {
             lenRow += lenNewWord + 1;
-            ++cntWordsRow;
-            addStr((*listRows)[*counter], " ");
-            addStr((*listRows)[*counter], listStr[i]);
+            helpRow[cntWordsRow++] = listStr[i];
         }
     }
-    while (min(cntWordsRow - 1, length - lenRow)) {
-        replace((*listRows)[*counter], " ", "  ", min(cntWordsRow - 1, length - lenRow));
-        lenRow += min(cntWordsRow - 1, length - lenRow);
-    }
-    ++(*counter);
-    free(listStr);
+    freeOneDArr(helpRow);
+    freeTwoDArr(listStr, n);
     return OK;
 }
 
@@ -98,4 +108,15 @@ int outputLists(char** listWords, int* listCounter, int count) {
 int outputText(char* s) {
     printf(s);
     return OK;
+}
+
+void freeTwoDArr(char** matrix, int rows) {
+    for (int i = 0; i < rows; ++i) {
+        free(matrix[i]);
+    }
+    free(matrix);
+}
+
+void freeOneDArr(char* arr) {
+    free(arr);
 }
