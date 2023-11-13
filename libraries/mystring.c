@@ -14,15 +14,23 @@ static void* mallocList(int count, int sizeOfType) {
 }
 
 char* createNewString(int count) {
-    char* str = mallocList(count, sizeof(char));
+    char* str = (char*)mallocList(count, sizeof(char));
     *str = '\0';
     return str;
+}
+
+char* copyStr(char* str) {
+    char *linkStr, *newStr= (char*)mallocList(lenStr(str)+1, sizeof(char));
+    linkStr = newStr;
+    for (; *str; *(newStr++) = *(str++));
+    *newStr = '\0';
+    return linkStr;
 }
 
 char* addStr(char* str, char* addStr) {
     char* p = str;
     str += lenStr(str);
-    for (; *addStr; *(str++) = *addStr++);
+    for (; *addStr; *(str++) = *(addStr++));
     *str = '\0';
     return p;
 }
@@ -64,11 +72,8 @@ char* addChar(char* str, int index, char addChar) {
     }
     else if (index > lenStr(str)) {
         return (char*)IndexOutOfRange;
-    }
-    int i = lenStr(str);
-    for (; i != index;) {
-        str[i-- + 1] = str[i];
-    }
+    }    
+    for (int i = lenStr(str); i != index-1; str[i-- + 1] = str[i]);
     str[index] = addChar;
     return str;
 }
@@ -137,17 +142,16 @@ char* replace(char* str, char* lastValue, char* newValue, int count) {
                 for (; h; addChar(str, i, newValue[h--]));
                 for (int j = k; j < k + lenLastValue; str[i + j++] = newValue[j]);
             }
-            --i;
+            i-= lenLastValue - lenNewValue;
         }
     } while (str[++i] && count);
     return str;
 }
 
 char* join(char** list, int count, char* joiner) {
-    int sizeStr = lenStr(joiner) * (count - 1) + 1;
+    int n = 0, sizeStr = lenStr(joiner) * (count - 1) + 1;
     for (int i = 0; i < count; sizeStr += lenStr(list[i++]));
     char* str = createNewString(sizeStr);
-    int n = 0;
     for (int i = 0; i < count; i++) {
         addStr(str + n, list[i]);
         n += lenStr(list[i]);
