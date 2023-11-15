@@ -13,6 +13,12 @@ static void* mallocList(int count, int sizeOfType) {
     return malloc(sizeOfType * count);
 }
 
+void swap(void** a, void** b) {
+    void* tmp = *a;
+    *a = *b;
+    *b = tmp;
+}
+
 char* createNewString(int count) {
     char* str = (char*)mallocList(count, sizeof(char));
     *str = '\0';
@@ -161,4 +167,25 @@ char* join(char** list, int count, char* joiner) {
         }
     }
     return str;
+}
+int lessOrEqualStr(char* a, char* b) {
+    int i = 0;
+    for (; a[i] && a[i] == b[i]; ++i);
+    if (a[i] == 0 || b[i] == 0) { return a[i]; }
+    return a[i] <= b[i];
+
+}
+
+void sortWords(char** words, int count) {
+    for (int i = 0; i < count - 1; ++i) {
+        for (int j = i + 1; j < count; ++j) {
+            if (!lessOrEqualStr(*(words + j - 1), *(words + j))) {
+                swap(words + j - 1, words + j);
+            }
+        }
+    }
+}
+
+char* concatWords(char* str, char** words, int count){
+    return join(words, count, str);
 }
