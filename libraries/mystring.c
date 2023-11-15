@@ -13,7 +13,7 @@ static void* mallocList(int count, int sizeOfType) {
     return malloc(sizeOfType * count);
 }
 
-void swap(void** a, void** b) {
+void swapStr(void** a, void** b) {
     void* tmp = *a;
     *a = *b;
     *b = tmp;
@@ -180,7 +180,7 @@ void sortWords(char** words, int count) {
     for (int i = 0; i < count - 1; ++i) {
         for (int j = i + 1; j < count; ++j) {
             if (!lessOrEqualStr(*(words + j - 1), *(words + j))) {
-                swap(words + j - 1, words + j);
+                swapStr(words + j - 1, words + j);
             }
         }
     }
