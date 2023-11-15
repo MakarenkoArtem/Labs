@@ -4,6 +4,9 @@
 #include<stdio.h>
 
 
+int lessOrEqualStr(char* a, char* b);
+void sortWords(char** words, int count);
+char* concatWords(char* str, char** words, int count);//join
 char* copyStr(char* str);
 char* lowerStr(char* str);
 char* toStr(char s);
