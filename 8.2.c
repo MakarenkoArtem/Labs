@@ -5,65 +5,116 @@
 #include<math.h>
 #include<stdlib.h>
 #include"libraries\mystring.h"
+#include <locale.h>
+
+#define min(a,b) (((a)<(b))?(a):(b))
+#define max(a,b) (((a)>(b))?(a):(b))
 
 #define OK 0
+#define Error "Error"
+#define MemoryError "Memory error"
 #define ErrorIncorrectInput "Incorrect input"
-#define OneSpaceRight " ,!.?-)"
+#define OneSpaceRight ",!.?-)"
 #define OneSpaceLeft "("
 
 
-int inputCount(int* count);
+void* reallocList(void* str, int count, int sizeOfType);
+void* mallocList(int count, int sizeOfType);
 int outputText(char* s);
-int solutionFunc(char* str);
+void freeTwoDArr(char** matrix, int rows);
+void freeOneDArr(char* arr);
+int inputCount(int* count);
+char** solutionFunc(char*** list, char* a, char* b, int count);
+int inputStrings(char** str, int count);
+int outputLists(char** list, char** anotherList, int count);
 
 int main() {
-    int count, n=0;
+    int count;
     if (inputCount(&count)) {
         outputText(ErrorIncorrectInput);
         _getch();
         return !OK;
     }
-    scanf("\n");
-    //fflush(stdin);
-    char** list = (char**)malloc(count * sizeof(void*));
-    for (int i = 0; i < count; ++i) {
-        list[i]= (char*)malloc(40*sizeof(char));
-        gets(list[i]);
+    char** list = (char**)mallocList(count, sizeof(void*));
+    if (inputStrings(&list, count)) {
+        outputText(MemoryError"\n");
+        _getch();
+        return !OK;
     }
-    char* a = (char*)malloc(50* sizeof(char));
-    gets(a);
-    char* b = (char*)malloc(50* sizeof(char));
-    gets(b);
-    for (int k = 0; k < count; k++) {
-        outputText(list[k]);
-        outputText("\n");
-        solutionFunc( list[k]);
-        char** listStr = split(list[k], " ", &n);
-        if (n != 3) {
-            outputText("It is not FIO\n");
-            continue;
-        }
-        listStr[2]=replace(listStr[2]+1, a, b, -1)-1;
-        outputText(join(listStr, 3, " "));
-        outputText("\n");
+    char *a = getStr(), *b = getStr();
+    if (a==NULL || b==NULL) {
+        outputText(MemoryError"\n");
+        _getch();
+        return !OK;
+    }
+    char** answerList = solutionFunc(&list, a, b, count);
+    if (answerList == (char**)!OK) {
+        outputText(Error"\n");
+        _getch();
+        return !OK;
+    }
+    if (outputLists(list, answerList, count) == (char**)!OK) {
+        outputText(Error"\n");
+        _getch();
+        return !OK;
     }
     _getch();
     return OK;
 }
 
-int solutionFunc(char* str) {
-    int i = 0;
-    while (str[i]) {
-        if (str[i] == ' ' && (i == 0 || str[i+1]=='\0' || charInSyms(str[i + 1], OneSpaceRight))) {
-            delChar(str, i);
-            continue;
-        }else if(charInSyms(str[i], OneSpaceLeft) && str[i+1]==' '){
-            delChar(str, i+1);
-            continue;
+int inputStrings(char*** str, int count) {
+    while (fgetc(stdin) != '\n');
+    for (int i = 0; i < count; ++i) {
+        (*str)[i] = getStr();
+        if ((*str)[i] == NULL) {
+            return !OK;
         }
-        i++;
     }
     return OK;
+}
+
+char** solutionFunc(char*** list, char* a, char* b, int count) {
+    int n = 0;
+    stdStr(a, &OneSpaceLeft, &OneSpaceRight);
+    stdStr(b, &OneSpaceLeft, &OneSpaceRight);
+    char** answerList = (char**)malloc(count * sizeof(void*));
+    for (int k = 0; k < count; k++) {
+        stdStr((*list)[k], &OneSpaceLeft, &OneSpaceRight);
+        char** listStr = split((*list)[k], " ", &n);
+        if (n == 3) {
+            listStr[2] = (char*)reallocList(listStr[2], max(lenStr(listStr[2])+1, (lenStr(listStr[2]) / lenStr(a) + 1) * lenStr(b) + 1), sizeof(char));
+            listStr[2] = replace((listStr[2] + 1), a, b, -1) - 1;
+            answerList[k] = join(listStr, 3, " ");
+        }
+        else {
+            answerList[k] = "It is not FIO";
+        }
+        freeTwoDArr(listStr, n);
+    }
+    return (count>=0)?(answerList):((char**)!OK);
+}
+
+int outputLists(char** list, char** anotherList, int count) {
+    for (int i = 0; i < count; i++) {
+        outputText("%s\n%s\n", list[i], anotherList[i]);
+    }
+    return (count >= 0) ? (OK) : ((int)!OK);
+}
+
+int outputText(char* s) {
+    printf(s);
+    return OK;
+}
+
+void freeTwoDArr(char** matrix, int rows) {
+    for (int i = 0; i < rows; ++i) {
+        free(matrix[i]);
+    }
+    free(matrix);
+}
+
+void freeOneDArr(char* arr) {
+    free(arr);
 }
 
 int inputCount(int* count) {
@@ -71,7 +122,10 @@ int inputCount(int* count) {
     return scanf("%i", count) == 0 || *count <= 0;
 }
 
-int outputText(char* s) {
-    printf(s);
-    return OK;
+void* reallocList(void* str, int count, int sizeOfType) {
+    return realloc(str, sizeOfType * count);
+}
+
+void* mallocList(int count, int sizeOfType) {
+    return malloc(sizeOfType * count);
 }
