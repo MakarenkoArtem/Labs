@@ -2,8 +2,13 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include<stdlib.h>
 #include<stdio.h>
+#include <conio.h>
 
 
+char* delSymbols(char* s, char* symbols);
+char* stdStr(char* str, char* OneSpaceLeft, char* OneSpaceRight);
+char* getStr();
+char* delExtraChars(char* str, char c);
 int lessOrEqualStr(char* a, char* b);
 void sortWords(char** words, int count);
 char* concatWords(char* str, char** words, int count);//join
@@ -11,7 +16,7 @@ char* copyStr(char* str);
 char* lowerStr(char* str);
 char* toStr(char s);
 char* addStr(char* str, char* addStr);
-char* createNewString(int count);
+char* createNewString(int count, char c);
 char* delChar(char* str, int index);
 char* subStr(char* str, int start, int end);
 int lenStr(char* str);
