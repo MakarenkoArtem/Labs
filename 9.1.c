@@ -7,15 +7,23 @@
 #include"libraries\mystring.h"
 #include <locale.h>
 
+#define min(a,b) (((a)<(b))?(a):(b))
+#define max(a,b) (((a)>(b))?(a):(b))
+
 #define OK 0
 #define Error "Error"
+#define MemoryError "Memory error"
 #define ErrorIncorrectInput "Incorrect input"
-#define OneSpaceRight " ,!.?-)"
+#define OneSpaceRight ",!.?-)"
 #define OneSpaceLeft "("
 
 
-int outputText(char* s);
+void* reallocList(void* str, int count, int sizeOfType);
 void* mallocList(int count, int sizeOfType);
+int outputText(char* s);
+void freeTwoDArr(char** matrix, int rows);
+void freeOneDArr(char* arr);
+int inputCount(int* count);
 int solutionFunc(char* str, char*** listWords, int** listCounter, int* count);
 int outputLists(char** listWords, int* listCounter, int count);
 
@@ -23,48 +31,38 @@ int main() {
     setlocale(LC_ALL, "Russian");
     SetConsoleCP(1251);
     SetConsoleOutputCP(1251);
-    char str[100];
-    gets(str);
-    char** listWords;
-    int count=0, *listCounter;
-    if (!solutionFunc(str, &listWords, &listCounter, &count) && !outputLists(listWords, listCounter, count)){
+    char **listWords,*str = getStr();
+    int count = 0, *listCounter;
+    if (!solutionFunc(str, &listWords, &listCounter, &count) && !outputLists(listWords, listCounter, count)) {
     }
     else {
         outputText("\n"Error);
+        _getch();
+        return !OK;
     }
+    freeOneDArr(str);
+    freeTwoDArr(listWords, count);
+    freeOneDArr(listCounter);
     _getch();
     return OK;
 }
 
-void* mallocList(int count, int sizeOfType) {
-    return malloc(sizeOfType * count);
-}
-
 int solutionFunc(char* str, char*** listWords, int** listCounter, int* count) {
     int n, j;
-    char s[2] = " \0";
-    for (int i = 0; i < lenStr(OneSpaceRight""OneSpaceLeft); ++i) {
-        if (OneSpaceRight""OneSpaceLeft[i] == ' ') { continue; }
-        s[0] = OneSpaceRight""OneSpaceLeft[i];
-        replace(str, s, " ", -1);
-    }
-    replace(str, "  ", " ", -1);
-    lowerStr(str);
+    delSymbols(str, &OneSpaceRight""OneSpaceLeft);
+    stdStr(lowerStr(str), &OneSpaceLeft, &OneSpaceRight);
     char** listStr = split(str, " ", &n);
     *listWords = (char**)mallocList(n, sizeof(char*));
     *listCounter = (int*)mallocList(n, sizeof(int));
     for (int i = 0; i < n; ++i) {
         for (j = 0; j < *count && !compareStr((*listWords)[j], listStr[i]); ++j);
         if (*count == j) {
-            (*listWords)[*count] = (char*)mallocList(lenStr(listStr[i]) + 1, sizeof(char));
-            (*listWords)[(*count)++] = listStr[i];
-            (*listCounter)[j] = 1;
+            (*listWords)[(*count)++] = copyStr(listStr[i]);
+            (*listCounter)[j] = 0;
         }
-        else {
-            ++(*listCounter)[j];
-        }
+        ++(*listCounter)[j];
     }
-    free(listStr);
+    freeOneDArr(listStr, n);
     return OK;
 }
 
@@ -74,7 +72,32 @@ int outputLists(char** listWords, int* listCounter, int count) {
     }
     return OK;
 }
+
 int outputText(char* s) {
     printf(s);
     return OK;
+}
+
+void freeTwoDArr(char** matrix, int rows) {
+    for (int i = 0; i < rows; ++i) {
+        free(matrix[i]);
+    }
+    free(matrix);
+}
+
+void freeOneDArr(char* arr) {
+    free(arr);
+}
+
+int inputCount(int* count) {
+    printf("Enter count: ");
+    return scanf("%i", count) == 0 || *count <= 0;
+}
+
+void* reallocList(void* str, int count, int sizeOfType) {
+    return realloc(str, sizeOfType * count);
+}
+
+void* mallocList(int count, int sizeOfType) {
+    return malloc(sizeOfType * count);
 }
