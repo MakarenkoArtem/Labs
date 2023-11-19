@@ -7,22 +7,24 @@
 #include"libraries\mystring.h"
 #include <locale.h>
 
-#define MIN(a,b) (((a)<(b))?(a):(b))
-#define MAX(a,b) (((a)>(b))?(a):(b))
+#define min(a,b) (((a)<(b))?(a):(b))
+#define max(a,b) (((a)>(b))?(a):(b))
 
 #define OK 0
 #define Error "Error"
+#define MemoryError "Memory error"
 #define ErrorIncorrectInput "Incorrect input"
-#define OneSpaceRight " ,!.?-)"
+#define OneSpaceRight ",!.?-)"
 #define OneSpaceLeft "("
 
 
-int outputText(char* s);
+void* reallocList(void* str, int count, int sizeOfType);
 void* mallocList(int count, int sizeOfType);
-int solutionFunc(char* str, int length, char*** listStr, int* counter);
-int outputLists(char** listWords, int* listCounter, int count);
+int outputText(char* s);
 void freeTwoDArr(char** matrix, int rows);
 void freeOneDArr(char* arr);
+int inputCount(int* count);
+int solutionFunc(char* str, int length, char*** listStr, int* counter);
 
 int main() {
     setlocale(LC_ALL, "Russian");
@@ -30,7 +32,7 @@ int main() {
     SetConsoleOutputCP(1251);
     char** listRows;
     int counter, length;
-    char str[150];
+    char* str = (char*)mallocList(300, sizeof(char));
     gets(str);
     if (inputCount(&length)) {
         outputText(ErrorIncorrectInput);
@@ -43,21 +45,14 @@ int main() {
         outputText("\n"Error);
     }
     freeTwoDArr(listRows, counter);
+    freeOneDArr(str);
     _getch();
     return OK;
 }
 
-int inputCount(int* count) {
-    printf("Enter count: ");
-    return scanf("%i", count) == 0 || *count <= 0;
-}
-
-void* mallocList(int count, int sizeOfType) {
-    return malloc(sizeOfType * count);
-}
-
 int solutionFunc(char* str, int length, char*** listRows, int* counter) {
-    replace(str, "  ", " ", -1);
+    //replace(str, "  ", " ", -1);
+    stdStr(str, &OneSpaceLeft, &OneSpaceRight);
     int n, h, lenRow, lenNewWord, cntWordsRow=0;
     *counter = 0;
     char** listStr = split(str, " ", &n);
@@ -72,14 +67,23 @@ int solutionFunc(char* str, int length, char*** listRows, int* counter) {
         lenNewWord = lenStr(listStr[i%n]);
         if (length < lenRow + lenNewWord + 1 || i==n) {
             if (cntWordsRow == 1) {
-                (*listRows)[(*counter)++] = copyStr(helpRow[0]);
+                if (lenStr(helpRow[0]) > length) {
+                    (*listRows)[(*counter)++] = subStr(helpRow[0], 0, length);
+                    helpRow[0] = subStr(helpRow[0], length, lenStr(helpRow[0]));
+                    lenRow -= length;
+                    --i;
+                    continue;
+                }
+                else {
+                    (*listRows)[(*counter)++] = copyStr(helpRow[0]);
+                }
             }
             else {
                 h = (length - lenRow) / (cntWordsRow - 1);
-                spaces=createNewString(length - 1);
-                for (int j = 0; j <= h; addChar(spaces, j++, ' '));
-                (*listRows)[*counter] = join(helpRow, cntWordsRow, spaces);
-                addChar(spaces, 0, ' ');
+                spaces=createNewString(h+1, ' ');
+                (*listRows)[*counter] = (char*)reallocList(join(helpRow, cntWordsRow, spaces), length+1,sizeof(char));
+                freeOneDArr(spaces);
+                spaces=createNewString(h+2, ' ');
                 replace((*listRows)[(*counter)++], subStr(spaces, 0, h+1), spaces, length - lenRow - (cntWordsRow - 1) * h);
                 freeOneDArr(spaces);
             }
@@ -99,12 +103,6 @@ int solutionFunc(char* str, int length, char*** listRows, int* counter) {
     return OK;
 }
 
-int outputLists(char** listWords, int* listCounter, int count) {
-    for (int i = 0; i < count; ++i) {
-        printf("%s: %i\n", listWords[i], listCounter[i]);
-    }
-    return OK;
-}
 int outputText(char* s) {
     printf(s);
     return OK;
@@ -119,4 +117,17 @@ void freeTwoDArr(char** matrix, int rows) {
 
 void freeOneDArr(char* arr) {
     free(arr);
+}
+
+int inputCount(int* count) {
+    printf("Enter count: ");
+    return scanf("%i", count) == 0 || *count <= 0;
+}
+
+void* reallocList(void* str, int count, int sizeOfType) {
+    return realloc(str, sizeOfType * count);
+}
+
+void* mallocList(int count, int sizeOfType) {
+    return malloc(sizeOfType * count);
 }
