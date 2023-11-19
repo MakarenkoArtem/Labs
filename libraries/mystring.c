@@ -1,9 +1,17 @@
 #include "mystring.h"
 
+#define min(a,b) (((a)<(b))?(a):(b))
+#define max(a,b) (((a)>(b))?(a):(b))
 #define OK 0
 #define Error -1
 #define IndexOutOfRange -2
-
+#define MemoryError -3
+/*
+#define NullSymbol '\0'
+#define BackScapeSymbol '\b'
+#define LineFeedSymbol '\n'
+#define CarriageReturnSymbol '\r'
+*/
 static void* reallocList(void* str, int count, int sizeOfType) {
     return realloc(str, sizeOfType * count);
 }
@@ -13,15 +21,16 @@ static void* mallocList(int count, int sizeOfType) {
     return malloc(sizeOfType * count);
 }
 
-void swap(void** a, void** b) {
+static void swap(void** a, void** b) {
     void* tmp = *a;
     *a = *b;
     *b = tmp;
 }
 
-char* createNewString(int count) {
-    char* str = (char*)mallocList(count, sizeof(char));
-    *str = '\0';
+char* createNewString(int count, char c) {
+    char* str = (char*)mallocList(++count, sizeof(char));
+    str[--count] = '\0';
+    for (; count; str[--count] = c);
     return str;
 }
 
@@ -51,7 +60,7 @@ char* addStrOnIndex(char* str, char* addStr, int index) {
 
 char* lowerStr(char* str) {
     int i;
-    char up[34] = "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ";
+    char *p=str, up[34] = "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ";
     char low[34] = "абвгдеёжзийклмнопрстуфхцчшщъыьэюя";
     for (;*str;++str) {
         if (charInSyms(*str, up)) {
@@ -59,7 +68,7 @@ char* lowerStr(char* str) {
             *str = low[i];
         }
     }
-    return str;
+    return p;
 }
 
 char* delChar(char* str, int index) {
@@ -72,6 +81,20 @@ char* delChar(char* str, int index) {
     for (; str[index]; str[index++] = str[index + 1]);
     return str;
 }
+
+char* delSomeCahr(char* str, int index, int count) {
+    if (index < 0 || count < 0) {
+        return (char*)Error;
+    }
+    else if (index >= lenStr(str)) {
+        return (char*)IndexOutOfRange;
+    }
+    else if (!count) { return str; }
+    count = min(lenStr(str) - index, count);
+    for (--index; str[index++]; str[index] = str[index + count]);
+    return str;
+}
+
 char* addChar(char* str, int index, char addChar) {
     if (index < 0) {
         return (char*)Error;
@@ -144,8 +167,7 @@ char* replace(char* str, char* lastValue, char* newValue, int count) {
                 for (; k--; delChar(str, i + lenNewValue));
             }else {
                 k = -k;
-                h = k;
-                for (; h; addChar(str, i, newValue[h--]));
+                for (h = k; h--; addChar(str, i, newValue[h]));//check the buffer size for the line
                 for (int j = k; j < k + lenLastValue; str[i + j++] = newValue[j]);
             }
             i-= lenLastValue - lenNewValue;
@@ -157,7 +179,7 @@ char* replace(char* str, char* lastValue, char* newValue, int count) {
 char* join(char** list, int count, char* joiner) {
     int n = 0, sizeStr = lenStr(joiner) * (count - 1) + 1;
     for (int i = 0; i < count; sizeStr += lenStr(list[i++]));
-    char* str = createNewString(sizeStr);
+    char* str = createNewString(sizeStr, '\0');
     for (int i = 0; i < count; i++) {
         addStr(str + n, list[i]);
         n += lenStr(list[i]);
@@ -188,4 +210,56 @@ void sortWords(char** words, int count) {
 
 char* concatWords(char* str, char** words, int count){
     return join(words, count, str);
+}
+
+char* delExtraChars(char* str, char c) {
+    int count = 0;
+    for (int i = 0; str[i]; ++i) {
+        while (str[count++ + i] == c);
+        if (--count) {
+            delSomeCahr(str, i, count - 1 + (str[0] == c || str[count + i] == '\0'));
+        }    
+        count = 0;
+    }
+    return str;
+}
+
+char* getStr() {
+    int count = 0, size=10;
+    char* str = (char*)mallocList(size, sizeof(char));
+    if (str == NULL) { return (char*)Error; }
+    while ((str[count] = getchar()) != EOF && str[count] != '\r' && str[count] != '\n' && str[count] != '\0') {
+        if (++count == size) {
+            size *= 2;
+            str = (char*)reallocList(str, size, sizeof(char));
+            if (str == NULL) { return (char*)Error; }
+        }
+    }
+    str[count] = '\0';
+    return str;
+}
+
+char* stdStr(char* str, char* OneSpaceLeft, char* OneSpaceRight) {
+    delExtraChars(str, ' ');
+    int i = 0;
+    while (str[i]) {
+        if (str[i] == ' ' && charInSyms(str[i + 1], OneSpaceRight)) {
+            delChar(str, i);
+            //continue;
+        }
+        else if (charInSyms(str[i], OneSpaceLeft) && str[i + 1] == ' ') {
+            delChar(str, i + 1);
+            //continue;
+        }
+        i++;
+    }
+    return str;
+}
+
+char* delSymbols(char* str, char* symbols) {
+    for (int i = 0; i < lenStr(symbols); ++i) {
+        if (symbols[i] == ' ') { continue; }
+        replace(str, createNewString(1, symbols[i]), " ", -1);
+    }
+    return str;
 }
