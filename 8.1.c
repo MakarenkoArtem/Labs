@@ -35,7 +35,7 @@ int main() {
     outputText("|");
     outputText(str);
     outputText("|\n|");
-    outputText(stdStr(str, &OneSpaceLeft, &OneSpaceRight));
+    outputText(stdStr(str, (char*)OneSpaceLeft, (char*)OneSpaceRight));
     outputText("|");
     freeOneDArr(str);
     _getch();
