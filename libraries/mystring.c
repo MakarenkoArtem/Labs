@@ -60,8 +60,8 @@ char* addStrOnIndex(char* str, char* addStr, int index) {
 
 char* lowerStr(char* str) {
     int i;
-    char *p=str, up[34] = "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ";
-    char low[34] = "абвгдеёжзийклмнопрстуфхцчшщъыьэюя";
+    char *p=str, up[60] = "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    char low[60] = "абвгдеёжзийклмнопрстуфхцчшщъыьэюяabcdefghijklmnopqrstuvwxyz";
     for (;*str;++str) {
         if (charInSyms(*str, up)) {
             for (i = 0; up[i] != *str; ++i);
