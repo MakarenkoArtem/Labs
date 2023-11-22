@@ -52,20 +52,18 @@ char* addStr(char* str, char* addStr) {
 char* addStrOnIndex(char* str, char* addStr, int index) {
     char* p = str;
     int lenstr = lenStr(str), lenadd = lenStr(addStr);
-    for (int i = 0; i <= lenadd; str[lenstr + lenadd - (i++)] = str[lenstr - i]);
-    str += index;
-    for (; *addStr; *(str++) = *(addStr++));
+    for (int i = 0; i <= lenstr - index; str[lenstr + lenadd - (i++)] = str[lenstr - i]);
+    for (str += index; *addStr;*(str++) = *(addStr++));
     return p;
 }
 
 char* lowerStr(char* str) {
     int i;
-    char *p=str, up[60] = "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    char* p = str, up[60] = "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯABCDEFGHIJKLMNOPQRSTUVWXYZ";
     char low[60] = "абвгдеёжзийклмнопрстуфхцчшщъыьэюяabcdefghijklmnopqrstuvwxyz";
     for (;*str;++str) {
         if (charInSyms(*str, up)) {
-            for (i = 0; up[i] != *str; ++i);
-            *str = low[i];
+            for (i = 0; up[i] != *str; *str = low[i++]);
         }
     }
     return p;
@@ -82,7 +80,7 @@ char* delChar(char* str, int index) {
     return str;
 }
 
-char* delSomeCahr(char* str, int index, int count) {
+char* delSomeChar(char* str, int index, int count) {
     if (index < 0 || count < 0) {
         return (char*)Error;
     }
@@ -120,7 +118,7 @@ int lenStr(char* str) {
 }
 
 char* subStr(char* str, int start, int end) {
-    // �������� ������ ��� ����� ������
+    // Выделяем память для новой строки
     char* slice = (char*)mallocList(end - start + 1, sizeof(char));
     for (int i = start; i < end; ++i) {
         slice[i - start] = str[i];
@@ -164,11 +162,13 @@ char* replace(char* str, char* lastValue, char* newValue, int count) {
             k = lenLastValue - lenNewValue;
             if (k >= 0) {
                 for (int j = 0; j < lenNewValue; str[i + j++] = newValue[j]);
-                for (; k--; delChar(str, i + lenNewValue));
+                delSomeChar(str, i + lenNewValue, k);
+                //for (; k--; delChar(str, i + lenNewValue));
+                k = 0;
             }else {
-                k = -k;
-                for (h = k; h--; addChar(str, i, newValue[h]));//check the buffer size for the line
-                for (int j = k; j < k + lenLastValue; str[i + j++] = newValue[j]);
+                addStrOnIndex(str, subStr(newValue, 0, -k), i);
+                //for (h = -k; h--; addChar(str, i, newValue[h]));//check the buffer size for the line
+                for (int j = -k; j < lenLastValue-k; str[i + j++] = newValue[j]);
             }
             i-= lenLastValue - lenNewValue;
         }
@@ -217,7 +217,7 @@ char* delExtraChars(char* str, char c) {
     for (int i = 0; str[i]; ++i) {
         while (str[count++ + i] == c);
         if (--count) {
-            delSomeCahr(str, i, count - 1 + (str[0] == c || str[count + i] == '\0'));
+            delSomeChar(str, i, count - 1 + (str[0] == c || str[count + i] == '\0'));
         }    
         count = 0;
     }
