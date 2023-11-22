@@ -8,6 +8,7 @@
 char* delSymbols(char* s, char* symbols);
 char* stdStr(char* str, char* OneSpaceLeft, char* OneSpaceRight);
 char* getStr();
+char* delSomeChar(char* str, int index, int count);
 char* delExtraChars(char* str, char c);
 int lessOrEqualStr(char* a, char* b);
 void sortWords(char** words, int count);
