@@ -3,8 +3,11 @@
 #include<stdlib.h>
 #include<stdio.h>
 #include <conio.h>
+#include < math.h >
 
-
+char* intToStr(int i);
+char** delStrInList(char** list, int index, int n);
+char** delThisStr(char** list, char* delStr, int* n);
 char* delSymbols(char* s, char* symbols);
 char* stdStr(char* str, char* OneSpaceLeft, char* OneSpaceRight);
 char* getStr();
