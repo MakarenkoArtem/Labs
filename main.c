@@ -1,4 +1,4 @@
-#define Task 102
+#define Task 111
 #define _CRT_SECURE_NO_WARNINGS
 //#include "stdafx.h"
 #include<stdio.h>
@@ -134,8 +134,8 @@ int outputLists(char** listWords, int* listCounter, int count);
 
 int main() {
     setlocale(LC_ALL, "Russian");
-    SetConsoleCP(1251);
-    SetConsoleOutputCP(1251);
+    //SetConsoleCP(1251);
+    //SetConsoleOutputCP(1251);
     char **listWords,*str = getStr();
     int count = 0, *listCounter;
     if (!solutionFunc(str, &listWords, &listCounter, &count) && !outputLists(listWords, listCounter, count)) {
@@ -184,8 +184,8 @@ int solutionFunc(char* str, int length, char*** listStr, int* counter);
 
 int main() {
     setlocale(LC_ALL, "Russian");
-    SetConsoleCP(1251);
-    SetConsoleOutputCP(1251);
+    //SetConsoleCP(1251);
+    //SetConsoleOutputCP(1251);
     char** listRows;
     int counter, length;
     char* str = (char*)mallocList(300, sizeof(char));
@@ -273,33 +273,44 @@ int inputStudents(StudentsList* list);
 int solutionFunc(StudentsList* list, StudentsList* first, StudentsList* second, StudentsList* third, StudentsList* fourth);
 int outputStruct(StudentsList* list);
 int sortStruct(StudentsList* list);
+void freeStruct(void* student);
+void freeStructList(void* structList);
 
 int main() {
     setlocale(LC_ALL, "Russian");
-    SetConsoleCP(1251);
-    SetConsoleOutputCP(1251);
+    //SetConsoleCP(1251);
+    //SetConsoleOutputCP(1251);
     int count;
     if (inputCount(&count)) {
         outputText(ErrorIncorrectInput);
         _getch();
         return !OK;
     }
-    StudentsList list;
-    list.list = (Student**)mallocList(count, sizeof(Student*));
-    list.count = count;
-    if (inputStudents(&list)) {
+    StudentsList* list = (StudentsList*)mallocList(1, sizeof(StudentsList));
+    list->list = (Student**)mallocList(count, sizeof(Student*));
+    list->count = count;
+    if (inputStudents(list)) {
         outputText(ErrorIncorrectInput);
         _getch();
         return !OK;
 
     }
-    StudentsList first = { NULL, 0 };// = (struct Student*)mallocList(count, sizeof(struct Student));
-    StudentsList second = { NULL, 0 };// = (struct Student*)mallocList(count, sizeof(struct Student));
-    StudentsList third = { NULL, 0 };// = (struct Student*)mallocList(count, sizeof(struct Student));
-    StudentsList fourth = { NULL, 0 };// = (struct Student*)mallocList(count, sizeof(struct Student));
-    if (solutionFunc(&list, &first, &second, &third, &fourth) || outputStruct(&first) || outputStruct(&second) || outputStruct(&third) || outputStruct(&fourth)) {
+    StudentsList* first = (StudentsList*)mallocList(1, sizeof(StudentsList));
+    StudentsList* second = (StudentsList*)mallocList(1, sizeof(StudentsList));
+    StudentsList* third = (StudentsList*)mallocList(1, sizeof(StudentsList));
+    StudentsList* fourth = (StudentsList*)mallocList(1, sizeof(StudentsList));
+    if (solutionFunc(list, first, second, third, fourth) || outputStruct(first) || outputStruct(second) || outputStruct(third) || outputStruct(fourth)) {
         outputText("\n"Error);
     }
+    freeStructList((void*)list);
+    first->count = 0;
+    second->count = 0;
+    third->count = 0;
+    fourth->count = 0;
+    freeStructList((void*)first);
+    freeStructList((void*)second);
+    freeStructList((void*)third);
+    freeStructList((void*)fourth);
     _getch();
     return OK;
 }
@@ -351,6 +362,10 @@ int solutionFunc(StudentsList* list, StudentsList* first, StudentsList* second, 
     second->list = (Student**)mallocList(list->count, sizeof(Student*));
     third->list = (Student**)mallocList(list->count, sizeof(Student*));
     fourth->list = (Student**)mallocList(list->count, sizeof(Student*));
+    first->count = 0;
+    second->count = 0;
+    third->count = 0;
+    fourth->count = 0;
     for (int i = 0; i < list->count; ++i) {
         if (valueInList(list->list[i]->marks, list->list[i]->countMarks, 2)) {
             fourth->list[fourth->count++] = list->list[i];
@@ -368,6 +383,18 @@ int solutionFunc(StudentsList* list, StudentsList* first, StudentsList* second, 
     return (list->count >= 0) ? (OK) : ((int)!OK);
 }
 
+void freeStruct(void* student) {
+    freeOneDStr(((Student*)student)->lastname);
+    freeOneDStr(((Student*)student)->marks);
+    freeOneDArr(student);
+}
+
+void freeStructList(void* structList) {
+    for (int i = 0; i < ((StudentsList*)structList)->count;) {
+        freeOneDArr((void*)((StudentsList*)structList)->list[i++]);
+    }
+    freeOneDArr(structList);
+}
 #elif Task==102
 typedef struct{
     char* lastname;
@@ -386,13 +413,14 @@ int solutionFunc(StudentsList* list, StudentsList* first, StudentsList* second, 
 int outputStruct(StudentsList* list);
 int sortStruct(StudentsList* list);
 int countInList(int* list, int len, int value);
-void* delElem(void* str, int count, int index);
+void** delElem(void** str, int count, int index);
 void freeStruct(void* student);
+void freeStructList(void* structList);
 
 int main() {
     setlocale(LC_ALL, "Russian");
-    SetConsoleCP(1251);
-    SetConsoleOutputCP(1251);
+    //SetConsoleCP(1251);
+    //SetConsoleOutputCP(1251);
     int count;
     if (inputCount(&count)) {
         outputText(ErrorIncorrectInput);
@@ -412,16 +440,18 @@ int main() {
     StudentsList* second = (StudentsList*)mallocList(1, sizeof(StudentsList));
     StudentsList* third = (StudentsList*)mallocList(1, sizeof(StudentsList));
     StudentsList* fourth = (StudentsList*)mallocList(1, sizeof(StudentsList));
-    if (solutionFunc(list, &first, &second, &third, &fourth) || outputStruct(&first) || outputStruct(&second) || outputStruct(&third) || outputStruct(&fourth)) {
+    if (solutionFunc(list, first, second, third, fourth) || outputStruct(first) || outputStruct(second) || outputStruct(third) || outputStruct(fourth)) {
         outputText("\n"Error);
     }
-    freeStructList((void*)&list);
-    free(&list);
-    outputStruct(&list);
-    freeStructList((void*)&first);
-    freeStructList((void*)&second);
-    freeStructList((void*)&third);
-    freeStructList((void*)&fourth);
+    freeStructList((void*)list);
+    first->count = 0;
+    second->count = 0;
+    third->count = 0;
+    fourth->count = 0;
+    freeStructList((void*)first);
+    freeStructList((void*)second);
+    freeStructList((void*)third);
+    freeStructList((void*)fourth);
     _getch();
     return OK;
 }
@@ -491,7 +521,7 @@ int solutionFunc(StudentsList* list, StudentsList* first, StudentsList* second, 
         if (valueInList(list->list[i]->marks, list->list[i]->countMarks, 2)) {
             if (countInList(list->list[i]->marks, list->list[i]->countMarks, 2) > 2) {
                 freeStruct((void*)list->list[i]);
-                delElem((void*)list->list, list->count--, i--);
+                delElem(&(void**)list->list, list->count--, i--);
             }
             else {
                 fourth->list[fourth->count++] = list->list[i];
@@ -512,40 +542,165 @@ int solutionFunc(StudentsList* list, StudentsList* first, StudentsList* second, 
 
 void freeStruct(void* student) {
     freeOneDStr(((Student*)student)->lastname);
+    freeOneDStr(((Student*)student)->marks);
     freeOneDArr(student);
 }
 
 void freeStructList(void* structList) {
     for (int i = 0; i < ((StudentsList*)structList)->count;) {
-        printf("%i ", i);
         freeOneDArr((void*)((StudentsList*)structList)->list[i++]);
     }
-    freeOneDArr(structList);// *(void**)structList);
+    freeOneDArr(structList);
 }
 
-void* delElem(void* str, int count, int index) {
+void** delElem(void*** str, int count, int index) {
     if (index < 0) {
         return (void*)Error;
     }
     else if (index >= count) {
         return (void*)IndexOutOfRange;
     }
-    for (; index != count-1; *((Student*)str+index++) = *((Student*)str+index + 1));
-    return (void*)str;
+    for (; index != count - 1;*((Student**)*str + index++) = *((Student**)*str + index + 1));
+    return str;
 }
-/*
-void* delElem(void* str, int count, int index) {
-    typedef int d;
-    if (index < 0) {
-        return (void*)Error;
-    }
-    else if (index >= count) {
-        return (void*)IndexOutOfRange;
-    }
-    for (; index!=count; (int)str[index++] = (int)str[index + 1]);
-    return (void*)str;
+
+#elif Task==111
+#define RFILE "input.txt"
+#define WFILE "output.txt"
+char* getStrFromFile(FILE*);
+void outputNumListToFile(FILE* file, char** list, int n);
+char** getListStrFromFile(FILE* file, int* k);
+
+int main() {
+    FILE* file = fopen(RFILE, "r"), *wfile= fopen(WFILE, "w");
+    int k=0;
+    char** list = getListStrFromFile(file, &k);
+    delThisStr(list, "", &k);
+    outputNumListToFile(wfile,list, k);
+    freeTwoDStr(list, k);
+    fclose(file);
+    fclose(wfile);
+    getchar();
+    return OK;
 }
-*/
+
+char** getListStrFromFile(FILE* file, int* k) {
+    int c = 5;
+    char** list = (char**)mallocList(c, sizeof(void*));
+    while (!feof(file)) {
+        if (*k == c) {
+            c *= 2;
+            list = (char**)reallocList(list, c, sizeof(void*));
+        }
+        list[(*k)++] = getStrFromFile(file);
+    }
+    return list;
+}
+void outputNumListToFile(FILE* file, char** list, int n) {
+    for (int i = 0; i < n; ++i){
+        if (i) { fprintf(file, "\n"); }
+        fprintf(file, "%d. %s", i+1, list[i]);
+    }
+}
+char* getStrFromFile(FILE *file) {
+    int count = 0, size = 10;
+    char* str = (char*)mallocList(size, sizeof(char));
+    if (str == NULL) { return (char*)Error; }
+    while ((str[count] = fgetc(file)) != EOF && str[count] != '\r' && str[count] != '\n' && str[count] != '\0') {
+        if (++count == size) {
+            size *= 2;
+            str = (char*)reallocList(str, size, sizeof(char));
+            if (str == NULL) { return (char*)Error; }
+        }
+    }
+    str[count] = '\0';
+    return str;
+}
+
+#elif Task==112
+#define LEN 255
+#define WORKFILE "listCars.txt"
+char* getStrFromFile(FILE*);
+void outputNumListToFile(FILE* file, char** list, int n);
+char** getListStrFromFile(FILE* file, int* k);
+
+typedef struct {
+    char brand[LEN];
+    char model[LEN];
+    int cost;
+    int year;
+}Car;
+
+int main() {
+    int c;
+    do {
+        scanf("%d", &c);
+        switch (c)
+        {
+        case 1:
+            addCar();
+            break;
+        case 2:
+
+            break;
+        case 3:
+
+            break;
+        case 4:
+
+            break;
+        case 5:
+            break;
+        default:
+            outputText(ErrorIncorrectInput);
+            break;
+        }
+    } while (c != 5);
+    FILE* file = fopen(WORKFILE, "r"), * wfile = fopen("output.txt", "w");
+    int k = 0;
+    char** list = getListStrFromFile(file, &k);
+    delThisStr(list, "", &k);
+    outputNumListToFile(wfile, list, k);
+    freeTwoDStr(list, k);
+    fclose(file);
+    fclose(wfile);
+    getchar();
+    return OK;
+}
+
+char** getListStrFromFile(FILE* file, int* k) {
+    int c = 5;
+    char** list = (char**)mallocList(c, sizeof(void*));
+    while (!feof(file)) {
+        if (*k == c) {
+            c *= 2;
+            list = (char**)reallocList(list, c, sizeof(void*));
+        }
+        list[(*k)++] = getStrFromFile(file);
+    }
+    return list;
+}
+void outputNumListToFile(FILE* file, char** list, int n) {
+    for (int i = 0; i < n; ++i) {
+        if (i) { fprintf(file, "\n"); }
+        fprintf(file, "%d. %s", i + 1, list[i]);
+    }
+}
+char* getStrFromFile(FILE* file) {
+    int count = 0, size = 10;
+    char* str = (char*)mallocList(size, sizeof(char));
+    if (str == NULL) { return (char*)Error; }
+    while ((str[count] = fgetc(file)) != EOF && str[count] != '\r' && str[count] != '\n' && str[count] != '\0') {
+        if (++count == size) {
+            size *= 2;
+            str = (char*)reallocList(str, size, sizeof(char));
+            if (str == NULL) { return (char*)Error; }
+        }
+    }
+    str[count] = '\0';
+    return str;
+}
+
 #endif*/
 
 int outputText(char* s) {
