@@ -133,6 +133,29 @@ int compareStr(char* a, char* b) {
     return !(a[i] || b[i]);
 }
 
+char** delStrInList(char** list, int index, int n) {
+    for (--n; index != n; *(list + index++) = *(list + index + 1));
+    return list;
+}
+
+char** delThisStr(char** list, char* delStr, int* n) {
+    int c = *n;
+    for (; c--;) {
+        if (compareStr((list)[c], delStr)) {
+            delStrInList(list, c, (*n)--);
+        }
+    }
+    return list;
+}
+
+char* intToStr(int i) {
+    char* str = createNewString(log10(i) + 1, '0'), *k=str;    
+    while (i) {
+        *(k++) = i % 10 + '0';
+        i /= 10;
+    }
+    return str;
+}
 
 char** split(char* str, char* s, int* n) {
     int i = 0, c = 0, lenSplitStr = lenStr(s);
@@ -223,6 +246,7 @@ char* delExtraChars(char* str, char c) {
     }
     return str;
 }
+
 
 char* getStr() {
     int count = 0, size=10;
