@@ -148,6 +148,14 @@ char** delThisStr(char** list, char* delStr, int* n) {
     return list;
 }
 
+int strToInt(char* str) {
+    int j=0;
+    while (*str) {
+        j = j * 10 + (int)*str++ - (int)'0';
+    }
+    return j;
+}
+
 char* intToStr(int i) {
     char* str = createNewString(log10(i) + 1, '0'), *k=str;    
     while (i) {
@@ -223,7 +231,7 @@ int lessOrEqualStr(char* a, char* b) {
 
 void sortWords(char** words, int count) {
     for (int i = 0; i < count - 1; ++i) {
-        for (int j = i + 1; j < count; ++j) {
+        for (int j =1; j < count-i; ++j) {//(int j = i + 1; j < count; ++j) {
             if (!lessOrEqualStr(*(words + j - 1), *(words + j))) {
                 swap(words + j - 1, words + j);
             }
@@ -247,12 +255,13 @@ char* delExtraChars(char* str, char c) {
     return str;
 }
 
-
-char* getStr() {
+char* getStrFromFile(FILE* file){
     int count = 0, size=10;
     char* str = (char*)mallocList(size, sizeof(char));
     if (str == NULL) { return (char*)Error; }
-    while ((str[count] = getchar()) != EOF && str[count] != '\r' && str[count] != '\n' && str[count] != '\0') {
+    str[count] = fgetc(file);
+    count += *str != '\n';
+    while ((str[count] = fgetc(file)) != EOF && str[count] != '\n' && str[count] != '\0' && str[count] != '\r') {
         if (++count == size) {
             size *= 2;
             str = (char*)reallocList(str, size, sizeof(char));
@@ -261,6 +270,10 @@ char* getStr() {
     }
     str[count] = '\0';
     return str;
+}
+
+char* getStr() {
+    return getStrFromFile(stdin);
 }
 
 char* stdStr(char* str, char* OneSpaceLeft, char* OneSpaceRight) {
@@ -287,3 +300,42 @@ char* delSymbols(char* str, char* symbols) {
     }
     return str;
 }
+
+char** getListStrFromFile(FILE* file, int* k) {
+    int c = 5;
+    *k = 0;
+    char** list = (char**)mallocList(c, sizeof(void*));
+    while (!feof(file)) {
+        if (*k == c) {
+            c *= 2;
+            list = (char**)reallocList(list, c, sizeof(void*));
+        }
+        list[(*k)++] = getStrFromFile(file);
+    }
+    return list;
+}
+/*
+char* getStrFromFile(FILE* file) {
+    int size = 10;
+    char* str = createNewString(0, '\0');// (char*)mallocList(1, sizeof(char));
+    char* buf = (char*)mallocList(size, sizeof(char));
+    while (!feof(file)){
+        fgets(buf, size, file);
+        addStr(str, buf);
+        //str = (char*)reallocList(str, size, sizeof(char));
+        printf("%s ??? ", buf);
+        printf("%s\n", str);
+    }
+    /*int count = 0, size = 10;
+    char* str = (char*)mallocList(size, sizeof(char));
+    if (str == NULL) { return (char*)Error; }
+    while ((str[count] = getchar()) != EOF && str[count] != '\r' && str[count] != '\n' && str[count] != '\0') {
+        if (++count == size) {
+            size *= 2;
+            str = (char*)reallocList(str, size, sizeof(char));
+            if (str == NULL) { return (char*)Error; }
+        }
+    }
+    str[count] = '\0';*/
+    /*return str;
+}*/
