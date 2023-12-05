@@ -31,9 +31,7 @@ void swap(void** a, void** b);
 void freeStructList(void* structList);
 #define RFILE "input.txt"
 #define WFILE "output.txt"
-char* getStrFromFile(FILE*);
 void outputNumListToFile(FILE* file, char** list, int n);
-char** getListStrFromFile(FILE* file, int* k);
 
 int main() {
     FILE* file = fopen(RFILE, "r"), *wfile= fopen(WFILE, "w");
@@ -48,18 +46,6 @@ int main() {
     return OK;
 }
 
-char** getListStrFromFile(FILE* file, int* k) {
-    int c = 5;
-    char** list = (char**)mallocList(c, sizeof(void*));
-    while (!feof(file)) {
-        if (*k == c) {
-            c *= 2;
-            list = (char**)reallocList(list, c, sizeof(void*));
-        }
-        list[(*k)++] = getStrFromFile(file);
-    }
-    return list;
-}
 void outputNumListToFile(FILE* file, char** list, int n) {
     for (int i = 0; i < n; ++i){
         if (i) { fprintf(file, "\n"); }
