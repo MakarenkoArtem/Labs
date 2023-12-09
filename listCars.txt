@@ -27,3 +27,8 @@ Bronco
 E38
 1998
 130000
+
+*)Lamborghini
+Countach
+1975
+200000
