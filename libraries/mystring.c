@@ -59,8 +59,8 @@ char* addStrOnIndex(char* str, char* addStr, int index) {
 
 char* lowerStr(char* str) {
     int i;
-    char* p = str, up[60] = "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    char low[60] = "абвгдеёжзийклмнопрстуфхцчшщъыьэюяabcdefghijklmnopqrstuvwxyz";
+    char* p = str, up[93] = "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    char low[93] = "абвгдеёжзийклмнопрстуфхцчшщъыьэюяabcdefghijklmnopqrstuvwxyz";
     for (;*str;++str) {
         if (charInSyms(*str, up)) {
             for (i = 0; up[i] != *str; *str = low[i++]);
@@ -106,9 +106,10 @@ char* addChar(char* str, int index, char addChar) {
 }
 
 char* toStr(char s) {
-    char str[2] = {' ',0};
+    return createNewString(1,s);
+    /*char str[2] = {' ',0};
     str[0] = s;
-    return str;
+    return str;*/
 }
 
 int lenStr(char* str) {
@@ -157,7 +158,7 @@ int strToInt(char* str) {
 }
 
 char* intToStr(int i) {
-    char* str = createNewString(log10(i) + 1, '0'), *k=str;    
+    char* str = createNewString(log10(abs(i)+2) + 1, '0'), *k=str;    
     while (i) {
         *(k++) = i % 10 + '0';
         i /= 10;
@@ -233,7 +234,7 @@ void sortWords(char** words, int count) {
     for (int i = 0; i < count - 1; ++i) {
         for (int j =1; j < count-i; ++j) {//(int j = i + 1; j < count; ++j) {
             if (!lessOrEqualStr(*(words + j - 1), *(words + j))) {
-                swap(words + j - 1, words + j);
+                swap((void**)words + j - 1, (void**)words + j);
             }
         }
     }
