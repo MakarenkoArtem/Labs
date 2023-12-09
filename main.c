@@ -1,11 +1,11 @@
-#define Task 120
+#define Task 91
 #define _CRT_SECURE_NO_WARNINGS
 //#include "stdafx.h"
 #include<stdio.h>
-#include<conio.h>
+//#include<conio.h>
 #include<math.h>
 #include<stdlib.h>
-#include"libraries\mystring.h"
+#include"libraries/mystring.h"
 #include <locale.h>
 
 #define min(a,b) (((a)<(b))?(a):(b))
@@ -41,7 +41,7 @@ int main() {
     char* str = getStr();
     if (str == NULL) {
         outputText(MemoryError"\n");
-        _getch();
+        getchar();
         return !OK;
     }
     outputText("|");
@@ -50,7 +50,7 @@ int main() {
     outputText(stdStr(str, (char*)OneSpaceLeft, (char*)OneSpaceRight));
     outputText("|");
     freeOneDStr(str);
-    _getch();
+    getchar();
     return OK;
 }
 
@@ -65,28 +65,28 @@ int main() {
     int count;
     if (inputCount(&count)) {
         outputText(ErrorIncorrectInput);
-        _getch();
+        getchar();
         return !OK;
     }
     char** list = (char**)mallocList(count, sizeof(void*));
     if (inputStrings(&list, count)) {
         outputText(MemoryError"\n");
-        _getch();
+        getchar();
         return !OK;
     }
     char *a = getStr(), *b = getStr();
     if (a==NULL || b==NULL) {
         outputText(MemoryError"\n");
-        _getch();
+        getchar();
         return !OK;
     }
     char** answerList = solutionFunc(&list, a, b, count);
     if (answerList == (char**)!OK || outputLists(list, answerList, count) == (char**)!OK) {
         outputText(Error"\n");
-        _getch();
+        getchar();
         return !OK;
     }
-    _getch();
+    getchar();
     return OK;
 }
 
@@ -144,13 +144,13 @@ int main() {
     }
     else {
         outputText("\n"Error);
-        _getch();
+        getchar();
         return !OK;
     }
     freeOneDStr(str);
     freeTwoDArr(listWords, count);
     freeOneDArr((void*)listCounter);
-    _getch();
+    getchar();
     return OK;
 }
 
@@ -194,7 +194,7 @@ int main() {
     gets(str);
     if (inputCount(&length)) {
         outputText(ErrorIncorrectInput);
-        _getch();
+        getchar();
         return !OK;
     }
     if (!solutionFunc(str, length, &listRows, &counter) && !outputText(join(listRows, counter, "\n"))) {
@@ -204,7 +204,7 @@ int main() {
     }
     freeTwoDStr(listRows, counter);
     freeOneDStr(str);
-    _getch();
+    getchar();
     return OK;
 }
 
@@ -285,7 +285,7 @@ int main() {
     int count;
     if (inputCount(&count)) {
         outputText(ErrorIncorrectInput);
-        _getch();
+        getchar();
         return !OK;
     }
     StudentsList* list = (StudentsList*)mallocList(1, sizeof(StudentsList));
@@ -293,7 +293,7 @@ int main() {
     list->count = count;
     if (inputStudents(list)) {
         outputText(ErrorIncorrectInput);
-        _getch();
+        getchar();
         return !OK;
 
     }
@@ -313,7 +313,7 @@ int main() {
     freeStructList((void*)second);
     freeStructList((void*)third);
     freeStructList((void*)fourth);
-    _getch();
+    getchar();
     return OK;
 }
 
@@ -408,8 +408,13 @@ typedef struct{
     Student** list;
     int count;
 }StudentsList;
-
-
+#define BADMARKSCOUNT 2
+#define VERYGOOD 5
+#define GOOD 4
+#define NORM 3
+#define BAD 2
+#define VERYBAD 1
+#define COUNT 4
 int inputStudents(StudentsList* list);
 int solutionFunc(StudentsList* list, StudentsList* first, StudentsList* second, StudentsList* third, StudentsList* fourth);
 int outputStruct(StudentsList* list);
@@ -426,7 +431,7 @@ int main() {
     int count;
     if (inputCount(&count)) {
         outputText(ErrorIncorrectInput);
-        _getch();
+        getchar();
         return !OK;
     }
     StudentsList* list=(StudentsList*)mallocList(1, sizeof(StudentsList));
@@ -434,7 +439,7 @@ int main() {
     list->count = count;
     if (inputStudents(list)) {
         outputText(ErrorIncorrectInput);
-        _getch();
+        getchar();
         return !OK;
 
     }
@@ -454,7 +459,7 @@ int main() {
     freeStructList((void*)second);
     freeStructList((void*)third);
     freeStructList((void*)fourth);
-    _getch();
+    getchar();
     return OK;
 }
 
@@ -463,12 +468,12 @@ int inputStudents(StudentsList* list) {
         while (fgetc(stdin) != '\n');
         Student* p= (Student*)mallocList(1, sizeof(Student));
         p->lastname = getStr();
-        p->countMarks = 4;
+        p->countMarks = COUNT;
         p->marks = (int*)mallocList(p->countMarks, sizeof(int));
         p->average = 0;
         list->list[i] = p;
         for (int j = 0; j < p->countMarks; ++j) {
-            if (scanf("%i", p->marks+j) != 1 || p->marks[j]>5 || p->marks[j]<1) {
+            if (scanf("%i", p->marks+j) != 1 || p->marks[j]>VERYGOOD || p->marks[j]<VERYBAD) {
                 return !OK;
             }
             p->average += p->marks[j];
@@ -477,6 +482,7 @@ int inputStudents(StudentsList* list) {
     }
     return OK;
 }
+
 int valueInList(int* list, int count, int value){
     int i = 0;
     for (; i < count && list[i] != value; i++);
@@ -493,7 +499,7 @@ int sortStruct(StudentsList* list) {
     for (int i = 0; i < list->count - 1; ++i) {
         for (int j = i + 1; j < list->count; ++j) {
             if (!lessOrEqualStr(list->list[j - 1]->lastname, list->list[j]->lastname)) {
-                swap(list->list + j - 1, list->list + j);
+                swap((void**)list->list + j - 1, (void**)list->list + j);
             }
         }
     }
@@ -504,7 +510,7 @@ int outputStruct(StudentsList* list) {
     sortStruct(list);
     for (int i = 0; i < list->count; ++i) {
         printf("\n%s\n", (list->list[i]->lastname));
-        for (int j = 0; j < list->list[i]->countMarks; printf("%d ", list->list[i]->marks[j++]));
+        for (int j = 0; j < list->list[i]->countMarks; printf("%i ", list->list[i]->marks[j++]));
         printf("\n%.2f\n", (list->list[i]->average));
     }
     return OK;
@@ -520,22 +526,22 @@ int solutionFunc(StudentsList* list, StudentsList* first, StudentsList* second, 
     third->count = 0;
     fourth->count = 0;
     for (int i = 0; i < list->count; ++i) {
-        if (valueInList(list->list[i]->marks, list->list[i]->countMarks, 2)) {
-            if (countInList(list->list[i]->marks, list->list[i]->countMarks, 2) > 2) {
+        if (valueInList(list->list[i]->marks, list->list[i]->countMarks, BAD)) {
+            if (countInList(list->list[i]->marks, list->list[i]->countMarks, BAD) > BADMARKSCOUNT) {
                 freeStruct((void*)list->list[i]);
-                delElem(&(void**)list->list, list->count--, i--);
+                delElem((void**)&list->list, list->count--, i--);
             }
             else {
                 fourth->list[fourth->count++] = list->list[i];
             }
         }
-        else if(valueInList((*list->list[i]).marks, list->list[i]->countMarks, 3)) {
+        else if(valueInList((*list->list[i]).marks, list->list[i]->countMarks, NORM)) {
             third->list[third->count++] = list->list[i];
         }
-        else if(valueInList((*list->list[i]).marks, list->list[i]->countMarks, 4)) {
+        else if(valueInList((*list->list[i]).marks, list->list[i]->countMarks, GOOD)) {
             second->list[second->count++] = list->list[i];
         }
-        else if (!valueInList(list->list[i]->marks, list->list[i]->countMarks, 1)) {
+        else if (!valueInList(list->list[i]->marks, list->list[i]->countMarks, VERYBAD)) {
             first->list[first->count++] = list->list[i];
         }
     }
@@ -555,14 +561,14 @@ void freeStructList(void* structList) {
     freeOneDArr(structList);
 }
 
-void** delElem(void*** str, int count, int index) {
+void** delElem(void** str, int count, int index) {
     if (index < 0) {
         return (void*)Error;
     }
     else if (index >= count) {
         return (void*)IndexOutOfRange;
     }
-    for (; index != count - 1;*((Student**)*str + index++) = *((Student**)*str + index + 1));
+    for (; index != count - 1;*((Student*)*str + index++) = *((Student*)*str + index + 1));
     return str;
 }
 
@@ -623,6 +629,8 @@ int printCarsInFile(Cars* list);
 void freeStructs(Cars* cars);
 void swapCars(Car** a, Car** b);
 int printCars(Cars* list);
+int addCar();
+int outputStruct(Car* car);
 
 int main() {
     int c, size;
@@ -837,7 +845,7 @@ void outputNumListToFile(FILE* file, char** list, int n) {
 
 #elif Task==120
 #define LEN 255
-#define WORKFILE "listCars.txt"
+#define WORKFILE "listCarsbyte.txt"
 #define COUNTARGS 4
 void outputNumListToFile(FILE* file, char** list, int n);
 
@@ -867,6 +875,8 @@ int printCarsInFile(Cars* list);
 void freeStructs(Cars* cars);
 void swapCars(Car** a, Car** b);
 int printCars(Cars* list);
+int addCar();
+int outputStruct(Car* car);
 
 int main() {
     int c, size;
@@ -991,29 +1001,47 @@ int delCar(Cars* cars) {
 
 int addCar() {
     FILE* file = fopen(WORKFILE, "ab");
+    Car car={NULL, NULL, NULL, NULL};
     printf("\nBrand:");
-    fprintf(file, "\n*)%s", getStr());
+    char* s = getStr();
+    for (int gg = -1; car.brand[gg++] || !gg; car.brand[gg] = s[gg]);
+    //fprintf(file, "\n*)%s", getStr());
     printf("\nModel:");
-    fprintf(file, "\n%s", getStr());
+    s=getStr();
+    for (int gg = -1; car.model[gg++] || !gg; car.model[gg] = s[gg]);
+    //fprintf(file, "\n%s", getStr());
     printf("\nyear:");
-    int c;
+    if(!scanf("%d", &car.year)){return !OK;}
+    /*int c;
     scanf("%d", &c);
     fprintf(file, "\n%d", c);
-    printf("\ncost:");
-    scanf("%d", &c);
+    */printf("\ncost:");
+    if(!scanf("%d", &car.cost)){return !OK;}
+    /*scanf("%d", &c);
     fprintf(file, "\n%d", c);
+    */
+    fwrite(&car, sizeof(Car), 1, file);
     fclose(file);
+    freeOneDStr(s);
     return OK;
 }
 
 Cars* getCars() {
     int c = 0;
     FILE* file = fopen(WORKFILE, "rb");
-    char** list = getListStrFromFile(file, &c);
-    delThisStr(list, "", &c);
+    fseek(file, 0, SEEK_END);
+    long long int size_ = ftell(file);
+    fseek(file, 0, SEEK_SET);
     Cars* cars = (Cars*)mallocList(1, sizeof(Cars));
     cars->size = 0;
-    cars->cars = (Car**)mallocList(c / COUNTARGS, sizeof(Car*));
+    cars->cars = (Car**)mallocList(size_/sizeof(Car), sizeof(Car*));
+    for(int i = 0;i<size_/sizeof(Car);i++){
+        cars->cars[cars->size++] = (Car*)mallocList(1, sizeof(Car));
+        fread(cars->cars[i], sizeof(Car), 1, file);
+    }
+   /* char** list = getListStrFromFile(file, &c);
+    delThisStr(list, "", &c);
+
     for (int i = 0; i < c; ++i) {
         if (compareStr("*)", subStr(list[i], 0, 2))) {
             cars->cars[cars->size] = (Car*)mallocList(1, sizeof(Car));
@@ -1024,7 +1052,7 @@ Cars* getCars() {
             i += 3;
         }
     }
-    freeTwoDStr(list, c);
+    freeTwoDStr(list, c);*/
     fclose(file);
     return cars;
 }
@@ -1037,10 +1065,12 @@ void printListCars(Cars* cars) {
 }
 
 int outputStructToFile(FILE* file, Car* car) {
+    fwrite(car, sizeof(Car), 1, file);
+/*
     fprintf(file, "*)%s\n", car->brand);
     fprintf(file, "%s\n", car->model);
     fprintf(file, "%d\n", car->year);
-    fprintf(file, "%d\n", car->cost);
+    fprintf(file, "%d\n", car->cost);*/
     return OK;
 }
 
