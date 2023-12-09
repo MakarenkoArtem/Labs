@@ -2,7 +2,7 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include<stdlib.h>
 #include<stdio.h>
-#include <conio.h>
+//#include <conio.h>
 #include<tgmath.h>
 #include<math.h>
 
@@ -35,3 +35,7 @@ char* charInSyms(char s, char* syms);
 char* replace(char* str, char* lastValue, char* newValue, int count);
 char* join(char** list, int count, char* joiner);
 char* addStrOnIndex(char* str, char* addStr, int index);
+//gcc -c main.c libraries/mystring.c
+//gcc -o main main.o mystring.o -lm
+//fseek(file, +-step, cur_
+//ftell()
