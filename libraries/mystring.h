@@ -3,7 +3,7 @@
 #include<stdlib.h>
 #include<stdio.h>
 //#include <conio.h>
-#include<tgmath.h>
+//#include<tgmath.h>
 #include<math.h>
 
 int strToInt(char* str);
