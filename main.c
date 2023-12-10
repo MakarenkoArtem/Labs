@@ -1,4 +1,4 @@
-#define Task 91
+#define Task 120
 #define _CRT_SECURE_NO_WARNINGS
 //#include "stdafx.h"
 #include<stdio.h>
@@ -133,6 +133,7 @@ int outputLists(char** list, char** anotherList, int count) {
 
 int solutionFunc(char* str, char*** listWords, int** listCounter, int* count);
 int outputLists(char** listWords, int* listCounter, int count);
+void sortByCounts(char** words, int* counters, int count);
 
 int main() {
     setlocale(LC_ALL, "Russian");
@@ -169,8 +170,26 @@ int solutionFunc(char* str, char*** listWords, int** listCounter, int* count) {
         }
         ++(*listCounter)[j];
     }
+    sortByCounts(*listWords, *listCounter, *count);
     freeTwoDStr(listStr, n);
     return OK;
+}
+
+void swapInt(int* a, int*b){
+    int tmp = *a;
+    *a=*b;
+    *b=tmp;
+}
+
+void sortByCounts(char** words, int* counters, int count) {
+    for (int i = 0; i < count - 1; ++i) {
+        for (int j =1; j < count-i; ++j) {//(int j = i + 1; j < count; ++j) {
+            if (*(counters + j - 1)< *(counters + j)) {
+                swap((void**)words + j - 1, (void**)words + j);
+                swapInt(counters + j - 1, counters + j);
+            }
+        }
+    }
 }
 
 int outputLists(char** listWords, int* listCounter, int count) {
@@ -857,8 +876,9 @@ typedef struct {
 }Car;
 
 typedef struct {
-    Car** cars;
     int size;
+    int* course;
+    int size_buf;
 }Cars;
 
 void printListCars(Cars* cars);
@@ -877,11 +897,15 @@ void swapCars(Car** a, Car** b);
 int printCars(Cars* list);
 int addCar();
 int outputStruct(Car* car);
+int countCars();
+Car getCar(int index);
 
 int main() {
     int c, size;
     FILE* file;
-    Cars* list;
+    Cars* list=(Cars*)mallocList(1, sizeof(Cars));
+    list->size_buf=max(10, countCars());
+    list->course =(int*)mallocList(list->size_buf, sizeof(int));
     char* str = (char*)mallocList(100, sizeof(char));
     do {
         scanf("%d", &c);
@@ -891,11 +915,16 @@ int main() {
             addCar();
             break;
         case 2:
-            list = getCars();
+            list->size=countCars();
+            while(list->size>list->size_buf){
+                list->size_buf*=2;
+            }
+            list->course =(int*)reallocList((void*)list->course, list->size_buf, sizeof(int));
+            for(int i=0;i<list->size; list->course[i++]=i);
             printListCars(list);
             freeStructs(list);
             break;
-        case 3:
+        /*case 3:
             printf("Sort by:");
             scanf("%s", str);
             str = lowerStr(stdStr(str, (char*)OneSpaceLeft, (char*)OneSpaceRight));
@@ -924,7 +953,7 @@ int main() {
             list = getCars();
             (delCar(list)) ? (outputText(ErrorIncorrectInput"\n")) : (printCarsInFile(list));
             freeStructs(list);
-            break;
+            break;*/
         case 5:
             break;
         default:
@@ -932,16 +961,18 @@ int main() {
             break;
         }
     } while (c != 5);
+    printf("???");
+    getchar();
     return OK;
 }
-
+/*
 int printCarsInFile(Cars* list) {
     FILE* file = fopen(WORKFILE, "wb");
     for (int i = 0; i < list->size; outputStructToFile(file, list->cars[i++]));
     fclose(file);
     return OK;
 }
-
+*//*
 Cars* sortCars(Cars* cars, int sortFunc(Car*, Car*)) {
     for (int i = 0; i < cars->size - 1; ++i) {
         for (int j = 1; j < cars->size - i; ++j) {
@@ -951,7 +982,7 @@ Cars* sortCars(Cars* cars, int sortFunc(Car*, Car*)) {
         }
     }
     return cars;
-}
+}*/
 int sortCosts(Car* a, Car* b) {
     return a->cost <= b->cost;
 }
@@ -971,7 +1002,7 @@ void swapCars(Car** a, Car** b) {
     *a = *b;
     *b = tmp;
 }
-
+/*
 int delCar(Cars* cars) {
     int i = 0, count = 0, * l = (int*)mallocList(cars->size, sizeof(int));
     printf("\nBrand:");
@@ -998,7 +1029,7 @@ int delCar(Cars* cars) {
     freeStruct(cars->cars[--cars->size]);
     return OK;
 }
-
+*/
 int addCar() {
     FILE* file = fopen(WORKFILE, "ab");
     Car car={NULL, NULL, NULL, NULL};
@@ -1020,12 +1051,36 @@ int addCar() {
     /*scanf("%d", &c);
     fprintf(file, "\n%d", c);
     */
+    printf("?3");
     fwrite(&car, sizeof(Car), 1, file);
     fclose(file);
-    freeOneDStr(s);
+    printf("?");
+    //freeOneDStr(s);
+    printf("/");
+    getchar();
+    printf("/");
+    freeStruct(&car);
+    getchar();
     return OK;
 }
 
+int countCars(){
+    FILE *file = fopen(WORKFILE, "rb");
+    fseek(file, 0, SEEK_END);
+    long long int size_ = ftell(file);
+    fclose(file);
+    return size_/sizeof(Cars);
+}
+
+Car getCar(int index) {
+    FILE* file = fopen(WORKFILE, "rb");
+    fseek(file, sizeof(Car)*index,SEEK_SET);
+    Car car;
+    fread(&car, sizeof(Car), 1, file);
+    fclose(file);
+    return car;
+}
+/*
 Cars* getCars() {
     int c = 0;
     FILE* file = fopen(WORKFILE, "rb");
@@ -1039,28 +1094,17 @@ Cars* getCars() {
         cars->cars[cars->size++] = (Car*)mallocList(1, sizeof(Car));
         fread(cars->cars[i], sizeof(Car), 1, file);
     }
-   /* char** list = getListStrFromFile(file, &c);
-    delThisStr(list, "", &c);
-
-    for (int i = 0; i < c; ++i) {
-        if (compareStr("*)", subStr(list[i], 0, 2))) {
-            cars->cars[cars->size] = (Car*)mallocList(1, sizeof(Car));
-            for (int gg = -1; cars->cars[cars->size]->brand[gg++] || !gg; cars->cars[cars->size]->brand[gg] = list[i][gg + 2]);
-            for (int gg = -1; cars->cars[cars->size]->model[gg++] || !gg; cars->cars[cars->size]->model[gg] = list[i + 1][gg]);
-            cars->cars[cars->size]->year = strToInt(list[i + 2]);
-            cars->cars[cars->size++]->cost = strToInt(list[i + 3]);
-            i += 3;
-        }
-    }
-    freeTwoDStr(list, c);*/
     fclose(file);
     return cars;
 }
-
+*/
 void printListCars(Cars* cars) {
+    Car car;
     for (int i = 0; i < cars->size;) {
+        car = getCar(cars->course[i]);
         printf("\n%i.", ++i);
-        outputStruct(cars->cars[i - 1]);
+        outputStruct(&car);
+        freeStruct(&car);
     }
 }
 
@@ -1087,8 +1131,7 @@ void freeStruct(Car* car) {
 }
 
 void freeStructs(Cars* cars) {
-    for (int i = 0; i < cars->size; freeStruct(cars->cars[i++]));
-    freeOneDArr((void*)cars->cars);
+    freeOneDArr((void*)cars->course);
     freeOneDArr((void*)cars);
 }
 

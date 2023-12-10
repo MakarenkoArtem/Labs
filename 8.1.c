@@ -1,7 +1,7 @@
 #define _CRT_SECURE_NO_WARNINGS
 //#include "stdafx.h"
 #include<stdio.h>
-#include<conio.h>
+//#include<conio.h>
 #include<math.h>
 #include<stdlib.h>
 #include"libraries\mystring.h"
