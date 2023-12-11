@@ -866,7 +866,6 @@ void outputNumListToFile(FILE* file, char** list, int n) {
 #define LEN 255
 #define WORKFILE "listCarsbyte.txt"
 #define COUNTARGS 4
-void outputNumListToFile(FILE* file, char** list, int n);
 
 typedef struct {
     char brand[LEN];
@@ -880,6 +879,23 @@ typedef struct {
     int* course;
     int size_buf;
 }Cars;
+
+#if defined(_WIN64) || defined(_WIN32)
+#include <windows.h>
+int moveEndOfFile(FILE* file){
+    return (int)SetEndOfFile(file);
+}
+#elif defined(__linux__)||defined(__linux)||defined(__gnu_linux__)
+#include <unistd.h>
+int moveEndOfFile(FILE* file){
+    return (int)ftruncate(fileno(file), ftell(file));
+}
+#else
+int moveEndOfFile(FILE* file){
+    return (int)fwrite(&(Car){"\n", (char)NULL, (int)NULL, (int)NULL}, sizeof(Car), 1, file);
+}
+#endif
+void outputNumListToFile(FILE* file, char** list, int n);
 
 void printListCars(Cars* cars);
 Cars* getCars(Cars* cars);
@@ -941,10 +957,10 @@ int main() {
             }
             printListCars(list);
             break;
-        /*case 4:
-            list = getCars();
-            (delCar(list)) ? (outputText(ErrorIncorrectInput"\n")) : (printCarsInFile(list));
-            break;*/
+        case 4:
+            getCars(list);
+            (delCar(list)) ? (outputText(ErrorIncorrectInput"\n")) : NULL;//(printCarsInFile(list));
+            break;
         case 5:
             break;
         default:
@@ -1003,37 +1019,48 @@ void swapCars(Car** a, Car** b) {
     *a = *b;
     *b = tmp;
 }
-/*
+
 int delCar(Cars* cars) {
     int i = 0, count = 0, * l = (int*)mallocList(cars->size, sizeof(int));
     printf("\nBrand:");
     char* s = getStr();
+    Car car;
     for (; i < cars->size; i++) {
-        if (compareStr(s, cars->cars[i]->brand)) {
+        if (compareStr(s, getCar(i).brand)) {
             l[count++] = i;
         }
     }
     i = 0;
     if (!count) {
+        freeOneDStr(s);
+        freeOneDArr((void*)l);
         return !OK;
     }
     else if (count > 1) {
-        for (i = 0; i < count; printf("\n%s", cars->cars[l[i++]]->model));
+        for (i = 0; i < count; printf("\n%s", getCar(l[i++]).model));
         printf("\nModel:");
-        char* s = getStr();
-        for (i = 0; i < count && !compareStr(s, cars->cars[l[i]]->model); ++i);
+        s = getStr();
+        for (i = 0; i < count && !compareStr(s, (getCar(l[i]).model)); ++i);
         if (i == count) {
             return !OK;
         }
     }
-    swap((void**)(cars->cars + l[i]), (void**)(cars->cars + cars->size - 1));
-    freeStruct(cars->cars[--cars->size]);
+    FILE* file = fopen(WORKFILE, "rb+");
+    if (cars->size>1){
+        car= getCar(cars->size-1);
+        fseek(file, sizeof(Car)*l[i], SEEK_SET);
+        fwrite(&car, sizeof(Car), 1, file);
+    }
+    fseek(file, (--cars->size)*sizeof(Car), SEEK_SET);
+    moveEndOfFile(file);
+    fclose(file);
+    freeOneDStr(s);
+    freeOneDArr((void*)l);
     return OK;
 }
-*/
+
 int addCar() {
     FILE* file = fopen(WORKFILE, "ab");
-    printf("%i", ftell(file));
     Car car={(char)NULL, (char)NULL, (int)NULL, (int)NULL};
     printf("\nBrand:");
     char* s = getStr();
@@ -1054,7 +1081,6 @@ int addCar() {
     fprintf(file, "\n%d", c);
     */
     fwrite(&car, sizeof(Car), 1, file);
-    printf("%i", ftell(file));
     fclose(file);
     return OK;
 }
@@ -1088,10 +1114,13 @@ Cars* getCars(Cars* cars) {
 
 void printListCars(Cars* cars) {
     Car car;
-    for (int i = 0; i < cars->size;) {
+    int helpVar = 0;
+    for (int i = 0; i < cars->size;++i) {
         car = getCar(cars->course[i]);
-        printf("\n%i.", ++i);
-        outputStruct(&car);
+        if(!compareStr(car.brand,"\n")){
+        printf("\n%i.", i+1-helpVar);
+        outputStruct(&car);}
+        else{helpVar++;}
     }
 }
 
