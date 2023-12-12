@@ -915,6 +915,7 @@ int addCar();
 int outputStruct(Car* car);
 int countCars();
 Car getCar(int index);
+//int binSearch(int count);
 
 int main() {
     int c, size;
@@ -1060,7 +1061,8 @@ int delCar(Cars* cars) {
 }
 
 int addCar() {
-    FILE* file = fopen(WORKFILE, "ab");
+    int size_ = countCars();
+    FILE* file = fopen(WORKFILE, "rb+");
     Car car={(char)NULL, (char)NULL, (int)NULL, (int)NULL};
     printf("\nBrand:");
     char* s = getStr();
@@ -1080,6 +1082,7 @@ int addCar() {
     /*scanf("%d", &c);
     fprintf(file, "\n%d", c);
     */
+    fseek(file, sizeof(Car)*size_, SEEK_SET);
     fwrite(&car, sizeof(Car), 1, file);
     fclose(file);
     return OK;
@@ -1088,9 +1091,10 @@ int addCar() {
 int countCars(){
     FILE *file = fopen(WORKFILE, "rb");
     fseek(file, 0, SEEK_END);
-    long long int size_ = ftell(file);
+    int i=ftell(file)/sizeof(Car);
     fclose(file);
-    return (int)size_/sizeof(Car);
+    for(;i && compareStr("\n",getCar(i-1).brand);--i);
+    return i;
 }
 
 Car getCar(int index) {
@@ -1133,7 +1137,26 @@ int outputStructToFile(FILE* file, Car* car) {
     fprintf(file, "%d\n", car->cost);*/
     return OK;
 }
-
+/*
+int binSearch(int count){
+    count = 9;
+    int c[9]={0,0,0,0,0,0,0,0,1};
+    int step = (count+3)/2, pos=count/2;
+    while (step/2){
+        step/=2;
+        //(compareStr("\n",getCar(pos).brand))?(step=-abs(step)):(step=abs(step));
+        (!c[pos])?(step=-abs(step)):(step=abs(step));
+        printf("step:%i index:%i\n", step, pos);
+        pos+=step;
+    }
+    printf("step:%i index:%i\n", step, pos);
+    if(!c[pos+min(step, 0)]){
+        printf("result:%i", pos+min(step, 0));
+        return pos+min(step, 0);
+    }
+    printf("result:%i", pos+max(step, 0));
+    return pos+max(step, 0);
+}*/
 int outputStruct(Car* car) {
     printf("brand:%s\n", car->brand);
     printf("model:%s\n", car->model);
