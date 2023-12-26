@@ -1,83 +1,144 @@
 #define _CRT_SECURE_NO_WARNINGS
-#include "stdafx.h"
+
 #include<stdio.h>
-#include<conio.h>
+#include<stdlib.h>
+#define COUNTMARKS 3
+#define OK 0
+typedef struct {
+    char Lastname[255];
+    char group[255];
+    int marks[3];
+} Student;
 
-int inPut(float* x, float* y);
-char* solutionFunction(float x, float y);
-int definitionY(float x, float y, int c);
-int determiningPosPoint(float y, float y1);
-char* findPosition(int a, int b, int c);
-int outPut(char* s);
+typedef struct {
+    char title[255];
+    Student* students;
+    int count;
+    int sizebuf;
+} Group;
+FILE *openFile(char *title);
 
-void main(){
-	float x, y;
-	if (!inPut(&x, &y)){
-		outPut("Incorrect input");
-	}else{
-		outPut(solutionFunction(x, y));
-	}
-	return 0;
-}
+int inputFile(char *title);
 
-char* solutionFunction(float x, float y) {
-	int a = definitionY(x, y, 0), b = definitionY(x, y, 1), c = definitionY(x, y, 2);
-	return findPosition(a, b, c);
-}
-int outPut(char* s){
-	printf(s);
-	_getch();
-	return 0;
-}
-int inPut(float* x, float* y) {
-	printf("Enter: ");
-	return scanf("%f%f", x, y) == 2;
-}
-char* findPosition(int a, int b, int c){
-	if (a!=1 & b!=-1 & c!=1)	{
-		return "Center";
-	}else if (a==1 & b==1 & c==1)	{
-		return "1";
-	}else if (a==1 & b==1 & c==-1)	{
-		return "2";
-	}else if (a==1 & b==-1 & c==-1)	{
-		return "3";
-	}else if (a==-1 & b==-1 & c==-1){
-		return "4";
-	}else if (a==-1 & b==-1 & c==1)	{
-		return "5";
-	}else if (a==-1 & b==1 & c==1){
-		return "6";
-	}else if (a==0){
-		return "y=x+2";
-	}else if (b==0)	{
-		return "y=-0.5*x-1";
-	}else if (c==0)	{
-		return "y=-2*x+2";
-	}
-}
-int definitionY(float x, float y, int c){
-	float y1;
-	if (c == 0)
-	{
-		y1 = x + 2;
-	}
-	else if (c == 1)
-	{
-		y1 = -0.5*x-1;
-	}else
-	{
-		y1 = -2*x+2;
-	}
-	return determiningPosPoint(y, y1);
+Student inputStudent();
+Group* readFile(char* title, int*count_groups);
+Group* delStudents(Group* s,  int count_groups);
+int outputGroups(Group* groups, int count_groups);
+
+int main() {
+    char* title="aaa.dat";
+    int count_groups;
+    openFile(title);
+    Group* groups=readFile(title, &count_groups);
+    groups = delStudents(groups, count_groups);
+    outputGroups(groups, count_groups);
+    return OK;
 }
 
-int determiningPosPoint(float y, float y1){
-	int a = 0;
-	if (y1 < y){
-		a=1;
-	}else if(y1 > y){
-		a=-1;
-	}
-	return a;
+FILE *openFile(char *title) {
+    FILE *file = fopen(title, "rb");
+    if (file == NULL) {
+        inputFile(title);
+    }
+    return file;
+}
+
+Student inputStudent() {
+    Student s;
+    fgets(s.Lastname, 255, stdin);
+    fgets(s.group, 255, stdin);
+    for (int i = 0; i < COUNTMARKS; i++) {
+        while (scanf("%d", s.marks + i) != 1);
+    }
+    while(getchar()!='\n');
+    return s;
+}
+
+int inputFile(char *title) {
+    FILE *file = fopen(title, "wb");
+    printf("Count of students: ");
+    int count;
+    scanf("%d", &count);
+    while(getchar()!='\n');
+    Student s;
+    for (int i = 0; i < count; i++) {
+        s = inputStudent();
+        fwrite(&s, sizeof(Student), 1, file);
+    }
+    fclose(file);
+    return OK;
+}
+int compareStr(char* a, char* b) {
+    int i = 0;
+    for (; a[i] && a[i] == b[i]; ++i);
+    return !(a[i] || b[i]);
+}
+
+Group* addStudent(Group* group, Student* s){
+    if(++group->count>=group->sizebuf){
+        group->sizebuf=group->count*2;
+        group->students= realloc(&(group->students), group->sizebuf);
+    }
+    group->students[group->count-1]=*s;
+    return group;
+}
+
+Group* readFile(char* title, int*count_groups){
+    FILE *file = fopen(title, "rb");
+    fseek(file, 0, SEEK_END);
+    int count = ftell(file)/sizeof(Student), j;
+    fseek(file, 0, SEEK_SET);
+    Group* groups=(Group*) malloc(count*sizeof(Group));
+    *count_groups=0;
+    Student s;
+    for(int i =0;i<count;i++){
+        fread(&s, sizeof(Student), 1, file);
+        for(j=0;j<*count_groups && !compareStr(s.group, groups[j].title);j++);
+        if(j==*count_groups){
+            groups[(*count_groups)++]=(Group){"", malloc(10*sizeof(Student)), 0, 10};
+            for(int h=0;!h || s.group[h-1]; h++){
+                groups[*count_groups-1].title[h]=s.group[h];
+            }
+        }
+        addStudent(groups+j, &s);
+    }
+    fclose(file);
+    return groups;
+}
+
+Group* delStudents(Group* s,  int count_groups){
+    int* arrDel, countDel, maxbadmarks, cur, pos;
+    for(int i=0;i<count_groups; i++){
+        maxbadmarks=-1;
+        arrDel=(int*) malloc(s[i].count*sizeof(int));
+        for(int j=0;j<s[i].count; j++){
+            cur=0;
+            for(int c=0;c<COUNTMARKS;c++){cur+=s[i].students[j].marks[c]<3;}
+            if(maxbadmarks<cur){
+                countDel=0;
+                maxbadmarks=cur;
+            }
+            if(maxbadmarks==cur){
+                arrDel[countDel++]=j;}
+        }
+        cur=arrDel[0];
+        pos=arrDel[0];
+        for(int j=0;cur<s[i].count;cur++){
+            if (cur!=arrDel[j]) {
+                s[i].students[pos++] = s[i].students[cur];
+            }else{j++;}
+        }
+        s[i].count=pos;
+        free(arrDel);
+    }
+    return s;
+}
+
+int outputGroups(Group* groups, int count_groups){
+    for(int i=0;i<count_groups; i++) {
+        for (int j = 0; j < groups[i].count; j++) {
+            printf("\n\n%s%s", groups[i].students->Lastname, groups[i].students->group);
+            for (int c = 0; c < COUNTMARKS; c++) { printf("%d ", groups[i].students[j].marks[c]); }
+        }
+    }
 }

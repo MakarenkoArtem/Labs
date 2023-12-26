@@ -7,3 +7,8 @@ Bronco
 Car
 2023
 0
+
+*)Nissan
+GT_R
+1996
+250000

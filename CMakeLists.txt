@@ -4,5 +4,5 @@ project(Labs)
 set(CMAKE_C_STANDARD 11)
 link_libraries(m)                #for math.h
 add_executable(${PROJECT_NAME}
-        main.c
-        libraries/mystring.c)
+        1.2.c)
+        #libraries/mystring.c)
